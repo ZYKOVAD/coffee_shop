@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeShop.API", "CoffeeShop.API\CoffeeShop.API.csproj", "{CC600779-D95D-4DA6-931A-80686669ACFD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|x64.Build.0 = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Debug|x86.Build.0 = Debug|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|x64.ActiveCfg = Release|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|x64.Build.0 = Release|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|x86.ActiveCfg = Release|Any CPU
+		{CC600779-D95D-4DA6-931A-80686669ACFD}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44F3D1C1-90E7-4BAB-BD7D-C83B63DE5052}
+	EndGlobalSection
+EndGlobal

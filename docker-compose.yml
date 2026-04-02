@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: coffee_shop_postgres
+    environment:
+      POSTGRES_DB: coffee_shop
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - coffee_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d coffee_shop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: coffee_shop_backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=coffee_shop;Username=admin;Password=admin
+    ports:
+      - "5000:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - coffee_network
+    restart: unless-stopped
+
+  # PgAdmin 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: coffee_shop_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@coffee.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - coffee_network
+
+volumes:
+  postgres_data:
+
+networks:
+  coffee_network:
+    driver: bridge
