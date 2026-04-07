@@ -4,58 +4,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace CoffeeShop.API.Migrations
 {
     /// <inheritdoc />
-    public partial class CreatedAllBaseModels : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Products",
-                keyColumn: "Id",
-                keyValue: 1);
-
-            migrationBuilder.DeleteData(
-                table: "Products",
-                keyColumn: "Id",
-                keyValue: 2);
-
-            migrationBuilder.DeleteData(
-                table: "Products",
-                keyColumn: "Id",
-                keyValue: 3);
-
-            migrationBuilder.AddColumn<int>(
-                name: "category_id",
-                table: "Products",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "count",
-                table: "Products",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<string>(
-                name: "img_url",
-                table: "Products",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "is_active",
-                table: "Products",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -102,55 +58,28 @@ namespace CoffeeShop.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "product_modifiers",
-                columns: table => new
-                {
-                    ModifiersId = table.Column<int>(type: "integer", nullable: false),
-                    ProductsId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_product_modifiers", x => new { x.ModifiersId, x.ProductsId });
-                    table.ForeignKey(
-                        name: "FK_product_modifiers_Modifiers_ModifiersId",
-                        column: x => x.ModifiersId,
-                        principalTable: "Modifiers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_product_modifiers_Products_ProductsId",
-                        column: x => x.ProductsId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CartItems",
+                name: "Products",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<int>(type: "integer", nullable: false),
-                    product_id = table.Column<int>(type: "integer", nullable: false),
-                    Count = table.Column<int>(type: "integer", nullable: false),
-                    selected_modifiers = table.Column<string>(type: "jsonb", nullable: false)
+                    category_id = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    img_url = table.Column<string>(type: "text", nullable: true),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    count = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartItems", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartItems_Products_product_id",
-                        column: x => x.product_id,
-                        principalTable: "Products",
+                        name: "FK_Products_Categories_category_id",
+                        column: x => x.category_id,
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CartItems_Users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -200,6 +129,58 @@ namespace CoffeeShop.API.Migrations
                         name: "FK_Orders_Users_user_id",
                         column: x => x.user_id,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CartItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
+                    product_id = table.Column<int>(type: "integer", nullable: false),
+                    Count = table.Column<int>(type: "integer", nullable: false),
+                    selected_modifiers = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CartItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CartItems_Products_product_id",
+                        column: x => x.product_id,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CartItems_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "product_modifiers",
+                columns: table => new
+                {
+                    ModifiersId = table.Column<int>(type: "integer", nullable: false),
+                    ProductsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_product_modifiers", x => new { x.ModifiersId, x.ProductsId });
+                    table.ForeignKey(
+                        name: "FK_product_modifiers_Modifiers_ModifiersId",
+                        column: x => x.ModifiersId,
+                        principalTable: "Modifiers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_product_modifiers_Products_ProductsId",
+                        column: x => x.ProductsId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -262,16 +243,6 @@ namespace CoffeeShop.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_category_id",
-                table: "Products",
-                column: "category_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_is_active",
-                table: "Products",
-                column: "is_active");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BonusTransactions_created_at",
@@ -349,6 +320,16 @@ namespace CoffeeShop.API.Migrations
                 column: "ProductsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_category_id",
+                table: "Products",
+                column: "category_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_is_active",
+                table: "Products",
+                column: "is_active");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -359,31 +340,16 @@ namespace CoffeeShop.API.Migrations
                 table: "Users",
                 column: "Phone",
                 unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Products_Categories_category_id",
-                table: "Products",
-                column: "category_id",
-                principalTable: "Categories",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Products_Categories_category_id",
-                table: "Products");
-
             migrationBuilder.DropTable(
                 name: "BonusTransactions");
 
             migrationBuilder.DropTable(
                 name: "CartItems");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Notifications");
@@ -401,41 +367,13 @@ namespace CoffeeShop.API.Migrations
                 name: "Modifiers");
 
             migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Products_category_id",
-                table: "Products");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Products_is_active",
-                table: "Products");
-
-            migrationBuilder.DropColumn(
-                name: "category_id",
-                table: "Products");
-
-            migrationBuilder.DropColumn(
-                name: "count",
-                table: "Products");
-
-            migrationBuilder.DropColumn(
-                name: "img_url",
-                table: "Products");
-
-            migrationBuilder.DropColumn(
-                name: "is_active",
-                table: "Products");
-
-            migrationBuilder.InsertData(
-                table: "Products",
-                columns: new[] { "Id", "Description", "Name", "Price" },
-                values: new object[,]
-                {
-                    { 1, "", "Латте", 250m },
-                    { 2, "", "Капучино", 230m },
-                    { 3, "", "Круассан", 150m }
-                });
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

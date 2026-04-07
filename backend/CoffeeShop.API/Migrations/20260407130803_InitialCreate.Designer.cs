@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoffeeShop.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260403124339_CreatedAllBaseModels")]
-    partial class CreatedAllBaseModels
+    [Migration("20260407130803_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

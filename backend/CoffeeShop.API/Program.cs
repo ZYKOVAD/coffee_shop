@@ -13,12 +13,26 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+// Register Repositories
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<BonusTransactionRepository>();
+builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<OrderItemRepository>();
+builder.Services.AddScoped<CartItemRepository>();
 builder.Services.AddScoped<ProductRepository>();
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<CategoryRepository>();
-builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ModifierRepository>();
+builder.Services.AddScoped<CategoryRepository>();
+
+// Register Services
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<BonusTransactionService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ModifierService>();
+builder.Services.AddScoped<CategoryService>();
 
 var app = builder.Build();
 
