@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.API.Services;
 using CoffeeShop.API.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CartController : ControllerBase
 {
     private readonly CartService _cartService;

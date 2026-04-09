@@ -3,6 +3,7 @@ using System;
 using CoffeeShop.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoffeeShop.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408091118_AddUserRole")]
+    partial class AddUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,11 +39,11 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("Created_at");
+                        .HasColumnName("created_at");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer")
-                        .HasColumnName("Order_id");
+                        .HasColumnName("order_id");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -48,7 +51,7 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("User_id");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -76,16 +79,16 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer")
-                        .HasColumnName("Product_id");
+                        .HasColumnName("product_id");
 
                     b.Property<string>("SelectedModifiers")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasColumnName("Selected_modifiers");
+                        .HasColumnName("selected_modifiers");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("User_id");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -106,7 +109,7 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
-                        .HasColumnName("Is_active");
+                        .HasColumnName("is_active");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -152,11 +155,11 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("Created_at");
+                        .HasColumnName("created_at");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean")
-                        .HasColumnName("Is_read");
+                        .HasColumnName("is_read");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -168,7 +171,7 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("User_id");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -190,30 +193,30 @@ namespace CoffeeShop.API.Migrations
                     b.Property<string>("BaristaComment")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("Barista_comment");
+                        .HasColumnName("barista_comment");
 
                     b.Property<decimal>("BonusEarned")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("Bonus_earned");
+                        .HasColumnName("bonus_earned");
 
                     b.Property<decimal>("BonusUsed")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("Bonus_used");
+                        .HasColumnName("bonus_used");
 
                     b.Property<string>("ClientComment")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("Client_comment");
+                        .HasColumnName("client_comment");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("Created_at");
+                        .HasColumnName("created_at");
 
                     b.Property<DateTime>("PickupTime")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("Pickup_time");
+                        .HasColumnName("pickup_time");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -222,11 +225,11 @@ namespace CoffeeShop.API.Migrations
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("Total_price");
+                        .HasColumnName("total_price");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("User_id");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -251,11 +254,11 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("Count")
                         .HasColumnType("integer")
-                        .HasColumnName("Count_items");
+                        .HasColumnName("count");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer")
-                        .HasColumnName("Order_id");
+                        .HasColumnName("order_id");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
@@ -263,23 +266,23 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer")
-                        .HasColumnName("Product_id");
+                        .HasColumnName("product_id");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasColumnName("Product_name");
+                        .HasColumnName("product_name");
 
                     b.Property<string>("SelectedModifiers")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasColumnName("Selected_modifiers");
+                        .HasColumnName("selected_modifiers");
 
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("Total_price");
+                        .HasColumnName("total_price");
 
                     b.HasKey("Id");
 
@@ -300,11 +303,11 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer")
-                        .HasColumnName("Category_id");
+                        .HasColumnName("category_id");
 
                     b.Property<int>("Count")
                         .HasColumnType("integer")
-                        .HasColumnName("Count_in_stock");
+                        .HasColumnName("count");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -312,11 +315,11 @@ namespace CoffeeShop.API.Migrations
 
                     b.Property<string>("ImgUrl")
                         .HasColumnType("text")
-                        .HasColumnName("Img_url");
+                        .HasColumnName("img_url");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
-                        .HasColumnName("Is_active");
+                        .HasColumnName("is_active");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -346,7 +349,7 @@ namespace CoffeeShop.API.Migrations
                     b.Property<decimal>("BonusBalance")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasColumnName("Bonus_balance");
+                        .HasColumnName("bonus_balance");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -357,14 +360,16 @@ namespace CoffeeShop.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Phone")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("Role");
+                        .HasColumnName("role");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

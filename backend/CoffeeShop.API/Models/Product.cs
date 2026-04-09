@@ -11,7 +11,7 @@ namespace CoffeeShop.API.Models
         public int Id { get; set; }
 
         [ForeignKey("Category")]
-        [Column("category_id")]
+        [Column("Category_id")]
         public int CategoryId { get; set; }
 
         [Required]
@@ -23,13 +23,13 @@ namespace CoffeeShop.API.Models
         [Precision(18, 2)]
         public decimal Price { get; set; }
 
-        [Column("img_url")]
+        [Column("Img_url")]
         public string? ImgUrl { get; set; }
 
-        [Column("is_active")]
+        [Column("Is_active")]
         public bool IsActive { get; set; } = true;
 
-        [Column("count")]
+        [Column("Count_in_stock")]
         public int Count { get; set; } = 0;
         public virtual Category Category { get; set; } = null!;
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.API.Services;
 using CoffeeShop.API.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers;
 
@@ -17,6 +18,7 @@ public class CategoriesController : ControllerBase
 
     // GET: api/categories
     [HttpGet]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> GetAll()
     {
         var categories = await _categoryService.GetAllCategoriesAsync();
@@ -25,6 +27,7 @@ public class CategoriesController : ControllerBase
 
     // GET: api/categories/active
     [HttpGet("active")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetActive()
     {
         var categories = await _categoryService.GetActiveCategoriesAsync();
@@ -33,6 +36,7 @@ public class CategoriesController : ControllerBase
 
     // GET: api/categories/id
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -44,6 +48,7 @@ public class CategoriesController : ControllerBase
 
     // GET: api/categories/id/statistics
     [HttpGet("{id}/statistics")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> GetStatistics(int id)
     {
         var statistics = await _categoryService.GetCategoryStatisticsAsync(id);
@@ -55,6 +60,7 @@ public class CategoriesController : ControllerBase
 
     // POST: api/categories
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto createDto)
     {
         if (!ModelState.IsValid)
@@ -73,6 +79,7 @@ public class CategoriesController : ControllerBase
 
     // PUT: api/categories/id
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto updateDto)
     {
         try
@@ -91,6 +98,7 @@ public class CategoriesController : ControllerBase
 
     // DELETE: api/categories/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -109,6 +117,7 @@ public class CategoriesController : ControllerBase
 
     // PUT: api/categories/id/activate
     [HttpPut("{id}/activate")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Activate(int id)
     {
         var result = await _categoryService.ActivateCategoryAsync(id);
@@ -120,6 +129,7 @@ public class CategoriesController : ControllerBase
 
     // PUT: api/categories/id/deactivate 
     [HttpPut("{id}/deactivate")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Deactivate(int id)
     {
         var result = await _categoryService.DeactivateCategoryAsync(id);

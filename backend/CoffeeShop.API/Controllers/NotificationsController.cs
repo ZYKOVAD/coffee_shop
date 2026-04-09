@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.API.Services;
 using CoffeeShop.API.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers;
 
@@ -16,6 +17,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetAll()
     {
         var notifications = await _notificationService.GetAllNotificationsAsync();
@@ -23,6 +25,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var notification = await _notificationService.GetNotificationByIdAsync(id);
@@ -32,6 +35,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize]
     public async Task<IActionResult> GetByUser(int userId)
     {
         var notifications = await _notificationService.GetUserNotificationsAsync(userId);
@@ -39,6 +43,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet("user/{userId}/unread")]
+    [Authorize]
     public async Task<IActionResult> GetUnread(int userId)
     {
         var notifications = await _notificationService.GetUnreadNotificationsAsync(userId);
@@ -46,6 +51,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet("user/{userId}/unread/count")]
+    [Authorize]
     public async Task<IActionResult> GetUnreadCount(int userId)
     {
         var count = await _notificationService.GetUnreadCountAsync(userId);
@@ -53,6 +59,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateNotificationDto createDto)
     {
         try
@@ -67,6 +74,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpPut("{id}/read")]
+    [Authorize]
     public async Task<IActionResult> MarkAsRead(int id)
     {
         var notification = await _notificationService.MarkAsReadAsync(id);
@@ -76,6 +84,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpPut("user/{userId}/read-all")]
+    [Authorize]
     public async Task<IActionResult> MarkAllAsRead(int userId)
     {
         await _notificationService.MarkAllAsReadAsync(userId);
@@ -83,6 +92,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _notificationService.DeleteNotificationAsync(id);

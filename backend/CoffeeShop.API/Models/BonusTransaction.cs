@@ -11,11 +11,11 @@ namespace CoffeeShop.API.Models
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        [Column("user_id")]
+        [Column("User_id")]
         public int UserId { get; set; }
 
         [ForeignKey("Order")]
-        [Column("order_id")]
+        [Column("Order_id")]
         public int? OrderId { get; set; }
 
         [Required]
@@ -25,7 +25,7 @@ namespace CoffeeShop.API.Models
         [Required]
         public string Type {  get; set; } = string.Empty;
 
-        [Column("created_at")]
+        [Column("Created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public virtual User User { get; set; } = null!;

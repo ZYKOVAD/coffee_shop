@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.API.Services;
 using CoffeeShop.API.DTO;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CoffeeShop.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly OrderService _orderService;
@@ -15,7 +18,16 @@ public class OrdersController : ControllerBase
         _orderService = orderService;
     }
 
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyOrders()
+    {
+        var userId = GetCurrentUserId();
+        var orders = await _orderService.GetUserOrdersAsync(userId);
+        return Ok(orders);
+    }
+
     [HttpGet]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetAll()
     {
         var orders = await _orderService.GetAllOrdersAsync();
@@ -32,6 +44,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetByUser(int userId)
     {
         var orders = await _orderService.GetUserOrdersAsync(userId);
@@ -39,6 +52,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("status/{status}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetByStatus(string status)
     {
         var orders = await _orderService.GetOrdersByStatusAsync(status);
@@ -46,6 +60,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("barista/pending")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetPendingForBarista()
     {
         var orders = await _orderService.GetPendingOrdersForBaristaAsync();
@@ -67,6 +82,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{orderId}/confirm")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> ConfirmOrder(int orderId, [FromBody] string? comment)
     {
         try
@@ -83,6 +99,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{orderId}/reject")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> RejectOrder(int orderId, [FromBody] string comment)
     {
         try
@@ -128,5 +145,11 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.Parse(userIdClaim ?? "0");
     }
 }

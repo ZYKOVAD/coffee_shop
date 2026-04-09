@@ -4,6 +4,7 @@ using CoffeeShop.API.Data;
 using CoffeeShop.API.Models;
 using CoffeeShop.API.DTO;
 using CoffeeShop.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers;
 
@@ -20,6 +21,7 @@ public class ProductsController : ControllerBase
 
     // GET: api/products
     [HttpGet]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetAll()
     {
         var products = await _productService.GetAllProductsAsync();
@@ -28,14 +30,16 @@ public class ProductsController : ControllerBase
 
     // GET: api/products/active
     [HttpGet("active")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetActive()
     {
         var products = await _productService.GetActiveProductsAsync();
         return Ok(products);
     }
 
-    // GET: api/products/category/id
+    // GET: api/products/category/id (active)
     [HttpGet("category/{categoryId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetByCategory(int categoryId)
     {
         var products = await _productService.GetProductsByCategoryAsync(categoryId);
@@ -44,6 +48,7 @@ public class ProductsController : ControllerBase
 
     // GET: api/products/id
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var product = await _productService.GetProductByIdAsync(id);
@@ -55,6 +60,7 @@ public class ProductsController : ControllerBase
 
     // POST: api/products
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateProductDto createDto)
     {
         if (!ModelState.IsValid)
@@ -73,6 +79,7 @@ public class ProductsController : ControllerBase
 
     // PUT: api/products/id
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto updateDto)
     {
         var product = await _productService.UpdateProductAsync(id, updateDto);
@@ -84,6 +91,7 @@ public class ProductsController : ControllerBase
 
     // PUT: api/products/activate/id
     [HttpPut("activate/{id}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Activate(int id)
     {
         var result = await _productService.ActivateProductAsync(id);
@@ -95,6 +103,7 @@ public class ProductsController : ControllerBase
 
     // PUT: api/products/deactivate/id
     [HttpPut("deactivate/{id}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Deactivate(int id)
     {
         var result = await _productService.DeactivateProductAsync(id);
@@ -106,6 +115,7 @@ public class ProductsController : ControllerBase
 
     // DELETE: api/products/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _productService.DeleteProductAsync(id);
@@ -117,6 +127,7 @@ public class ProductsController : ControllerBase
 
     // POST: api/products/id/modifiers/id
     [HttpPost("{productId}/modifiers/{modifierId}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> AddModifier(int productId, int modifierId)
     {
         var result = await _productService.AddModifierToProductAsync(productId, modifierId);
@@ -128,6 +139,7 @@ public class ProductsController : ControllerBase
 
     // DELETE: api/products/id/modifiers/id
     [HttpDelete("{productId}/modifiers/{modifierId}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> RemoveModifier(int productId, int modifierId)
     {
         var result = await _productService.RemoveModifierFromProductAsync(productId, modifierId);

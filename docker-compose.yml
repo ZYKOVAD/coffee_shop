@@ -33,12 +33,17 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=coffee_shop;Username=admin;Password=admin
     ports:
       - "5000:80"
+    volumes:
+      # Монтируем папку с кодом для hot reload
+      - ./backend/CoffeeShop.API:/app/CoffeeShop.API
+      # Исключаем bin и obj, чтобы не конфликтовать
+      - /app/CoffeeShop.API/bin
+      - /app/CoffeeShop.API/obj
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - coffee_network
-    restart: unless-stopped
 
   # PgAdmin 
   pgadmin:

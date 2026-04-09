@@ -44,6 +44,13 @@ public class UserRepository
         return await _dbSet.FirstOrDefaultAsync(u => u.Username == username);
     }
 
+    public async Task<List<User>> GetByRoleAsync(string role)
+    {
+        return await _dbSet
+            .Where(u => u.Role == role)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(User user)
     {
         await _dbSet.AddAsync(user);

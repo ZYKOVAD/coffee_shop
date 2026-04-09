@@ -11,7 +11,7 @@ namespace CoffeeShop.API.Models
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
-        [Column("is_active")]
+        [Column("Is_active")]
         public bool IsActive { get; set; }
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }

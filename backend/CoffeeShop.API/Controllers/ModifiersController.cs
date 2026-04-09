@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CoffeeShop.API.Services;
 using CoffeeShop.API.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoffeeShop.API.Controllers;
 
@@ -17,6 +18,7 @@ public class ModifiersController : ControllerBase
 
     // GET: api/modifiers
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         var modifiers = await _modifierService.GetAllModifiersAsync();
@@ -25,6 +27,7 @@ public class ModifiersController : ControllerBase
 
     // GET: api/modifiers/id
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var modifier = await _modifierService.GetModifierByIdAsync(id);
@@ -36,6 +39,7 @@ public class ModifiersController : ControllerBase
 
     // GET: api/modifiers/product/id
     [HttpGet("product/{productId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetByProduct(int productId)
     {
         var modifiers = await _modifierService.GetModifiersByProductAsync(productId);
@@ -44,6 +48,7 @@ public class ModifiersController : ControllerBase
 
     // POST: api/modifiers
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateModifierDto createDto)
     {
         if (!ModelState.IsValid)
@@ -61,6 +66,7 @@ public class ModifiersController : ControllerBase
     }
 
     // PUT: api/modifiers/id
+    [Authorize(Roles = "admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateModifierDto updateDto)
     {
@@ -80,6 +86,7 @@ public class ModifiersController : ControllerBase
 
     // DELETE: api/modifiers/id
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -98,6 +105,7 @@ public class ModifiersController : ControllerBase
 
     // POST: api/modifiers/id/products/id
     [HttpPost("{modifierId}/products/{productId}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> AddToProduct(int modifierId, int productId)
     {
         var result = await _modifierService.AddModifierToProductAsync(modifierId, productId);
@@ -109,6 +117,7 @@ public class ModifiersController : ControllerBase
 
     // DELETE: api/modifiers/id/products/id
     [HttpDelete("{modifierId}/products/{productId}")]
+    [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> RemoveFromProduct(int modifierId, int productId)
     {
         var result = await _modifierService.RemoveModifierFromProductAsync(modifierId, productId);

@@ -11,29 +11,29 @@ namespace CoffeeShop.API.Models
         public int Id { get; set; }
 
         [ForeignKey("Order")]
-        [Column("order_id")]
+        [Column("Order_id")]
         public int OrderId { get; set; }
 
         [ForeignKey("Product")]
-        [Column("product_id")]
+        [Column("Product_id")]
         public int ProductId { get; set; }
 
         [Required]
-        [Column("product_name")]
+        [Column("Product_name")]
         [MaxLength(200)]
         public string ProductName { get; set; } = string.Empty;
 
-        [Column("count")]
+        [Column("Count_items")]
         public int Count { get; set; }
 
         [Required]
         [Precision(18, 2)]
         public decimal Price { get; set; }
 
-        [Column("selected_modifiers", TypeName = "jsonb")]
+        [Column("Selected_modifiers", TypeName = "jsonb")]
         public string SelectedModifiers { get; set; } = "[]";
 
-        [Column("total_price")]
+        [Column("Total_price")]
         [Precision(18, 2)]
         public decimal TotalPrice { get; set; }
 

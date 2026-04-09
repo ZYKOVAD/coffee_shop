@@ -10,17 +10,17 @@ namespace CoffeeShop.API.Models
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        [Column("user_id")]
+        [Column("User_id")]
         public int UserId { get; set; }
 
         [ForeignKey("Product")]
-        [Column("product_id")]
+        [Column("Product_id")]
         public int ProductId { get; set; }
 
         [Required]
         public int Count { get; set; } = 1;
 
-        [Column("selected_modifiers", TypeName = "jsonb")]
+        [Column("Selected_modifiers", TypeName = "jsonb")]
         public string SelectedModifiers { get; set; } = "[]";
         public virtual User User { get; set; } = null!;
         public virtual Product Product { get; set; } = null!;

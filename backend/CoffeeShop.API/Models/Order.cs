@@ -10,26 +10,26 @@ namespace CoffeeShop.API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [ForeignKey("User")]
-        [Column("user_id")]
+        [Column("User_id")]
         public int UserId { get; set; }
         [Required]
         public string Status { get; set; } = string.Empty;
-        [Column("total_price")]
+        [Column("Total_price")]
         [Precision(18, 2)]
         public decimal TotalPrice { get; set; }
-        [Column("bonus_used")]
+        [Column("Bonus_used")]
         [Precision(18, 2)]
         public decimal BonusUsed { get; set; }
-        [Column("bonus_earned")]
+        [Column("Bonus_earned")]
         [Precision(18, 2)]
         public decimal BonusEarned { get; set; }
-        [Column("pickup_time")]
+        [Column("Pickup_time")]
         public DateTime PickupTime { get; set; }
-        [Column("barista_comment")]
+        [Column("Barista_comment")]
         public string BaristaComment { get; set; } = string.Empty;
-        [Column("client_comment")]
+        [Column("Client_comment")]
         public string ClientComment { get; set; } = string.Empty;
-        [Column("created_at")]
+        [Column("Created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public virtual User User { get; set; } = null!;
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
