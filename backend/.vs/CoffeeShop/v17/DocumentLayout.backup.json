@@ -3,20 +3,44 @@
   "WorkspaceRootPath": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\orderitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\orderitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\modifier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\modifier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\cartitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\cartitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\\u0432\u0443\u0437\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\coffeeshop.api\\models\\bonustransaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\bonustransaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,8 +50,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Program.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Program.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Program.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Program.cs",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAAAG4AAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:38:13.794Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
@@ -46,54 +83,119 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "UsersController.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\UsersController.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Controllers\\UsersController.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\UsersController.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Controllers\\UsersController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAABUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-08T10:13:32.072Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAmwEMAAAAXAAAAAAAAAA==",
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\User.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\User.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\User.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAACEAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-08T10:03:36.3Z",
+              "WhenOpened": "2026-04-14T07:12:47.073Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAbAAAAAAAAAA==",
+              "Title": "Product.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Product.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Product.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Product.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\Product.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-08T10:03:13.306Z",
+              "WhenOpened": "2026-04-14T07:12:28.712Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Program.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Program.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Program.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGoAAAAaAAAAAAAAAA==",
+              "Title": "OrderItem.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\OrderItem.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\OrderItem.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\OrderItem.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\OrderItem.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T11:52:47.462Z",
+              "WhenOpened": "2026-04-14T07:11:48.138Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Order.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Order.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Order.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Order.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\Order.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAkwCAAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:11:08.438Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Notification.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Notification.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Notification.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Notification.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\Notification.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:10:51.886Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Modifier.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Modifier.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Modifier.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Modifier.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\Modifier.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:10:40.551Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Category.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Category.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Category.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Category.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\Category.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:10:32.589Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CartItem.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\CartItem.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\CartItem.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\CartItem.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\CartItem.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBQAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:10:11.048Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "BonusTransaction.cs",
+              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\BonusTransaction.cs",
+              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\BonusTransaction.cs",
+              "ToolTip": "C:\\Users\\Darisha\\Documents\\\u0412\u0423\u0417\\\u0434\u0438\u043F\u043B\u043E\u043C\\coffee_shop\\backend\\CoffeeShop.API\\Models\\BonusTransaction.cs",
+              "RelativeToolTip": "CoffeeShop.API\\Models\\BonusTransaction.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwCAAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:09:44.63Z",
               "EditorCaption": ""
             }
           ]

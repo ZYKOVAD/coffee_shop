@@ -27,21 +27,19 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: coffee_shop_backend
+
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=coffee_shop;Username=admin;Password=admin
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=coffee_shop;Username=admin;Password=admin
+
     ports:
-      - "5000:80"
-    volumes:
-      # Монтируем папку с кодом для hot reload
-      - ./backend/CoffeeShop.API:/app/CoffeeShop.API
-      # Исключаем bin и obj, чтобы не конфликтовать
-      - /app/CoffeeShop.API/bin
-      - /app/CoffeeShop.API/obj
+      - "5001:80"
+
     depends_on:
       postgres:
         condition: service_healthy
+
     networks:
       - coffee_network
 
