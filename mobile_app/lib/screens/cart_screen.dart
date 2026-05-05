@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/cart_service.dart';
 import '../services/auth_service.dart';
 import '../models/cart_item.dart';
+import '../utils/colors.dart';
+import '../widgets/app_buttons.dart';
 import 'auth_screen.dart';
+import 'dart:convert';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -16,12 +20,26 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authService = context.read<AuthService>();
-      if (authService.isLoggedIn) {
-        context.read<CartService>().loadCart();
-      }
-    });
+    _init();
+  }
+
+  Future<void> _init() async {
+    final auth = context.read<AuthService>();
+
+    if (auth.status == AuthStatus.authenticated) {
+      await context.read<CartService>().loadCart();
+    }
+  }
+
+  Future<void> _loginIfNeeded() async {
+    final auth = context.read<AuthService>();
+
+    if (auth.status == AuthStatus.authenticated) return;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AuthScreen()),
+    );
   }
 
   @override
@@ -29,370 +47,321 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Корзина'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.brown,
+        elevation: 0,
       ),
       body: Consumer2<CartService, AuthService>(
-        builder: (context, cartService, authService, child) {
-          // ✅ Если не авторизован — показываем предложение войти
-          if (!authService.isLoggedIn) {
-            return _buildNotLoggedInWidget();
-          }
-
-          if (cartService.isLoading) {
+        builder: (context, cart, auth, _) {
+          if (auth.status == AuthStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (cartService.items.isEmpty) {
-            return _buildEmptyCartWidget();
+          if (auth.status == AuthStatus.unauthenticated) {
+            return _buildAuthRequired();
           }
 
-          return _buildCartContent(cartService);
+          if (cart.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (cart.items.isEmpty) {
+            return _buildEmpty();
+          }
+
+          return _buildCart(cart);
         },
       ),
     );
   }
 
-  Widget _buildNotLoggedInWidget() {
+  // ================= AUTH =================
+
+  Widget _buildAuthRequired() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.lock_outline, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Войдите чтобы увидеть корзину',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Авторизуйтесь для оформления заказа',
-            style: TextStyle(color: Colors.grey[400]),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AuthScreen()),
-              );
-              if (result == true) {
-                context.read<CartService>().loadCart();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6F4E37),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.lock_outline, size: 80, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text(
+              'Войдите, чтобы использовать корзину',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
             ),
-            child: const Text('Войти'),
-          ),
-        ],
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _loginIfNeeded,
+              style: AppButtons.primary,
+              child: const Text('Войти'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyCartWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Корзина пуста',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Добавьте товары из меню',
-            style: TextStyle(color: Colors.grey[400]),
-          ),
-        ],
+  // ================= EMPTY =================
+
+  Widget _buildEmpty() {
+    return const Center(
+      child: Text(
+        'Корзина пуста',
+        style: TextStyle(color: Colors.grey),
       ),
     );
   }
 
-  Widget _buildCartContent(CartService cartService) {
+  // ================= CART =================
+
+  Widget _buildCart(CartService cart) {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
+          child: ListView.separated(
             padding: const EdgeInsets.all(12),
-            itemCount: cartService.items.length,
+            itemCount: cart.items.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              final item = cartService.items[index];
-              return _buildCartItemCard(
+              final item = cart.items[index];
+
+              return _CartItemTile(
                 item: item,
-                onIncrement: () => cartService.updateQuantity(item.id, item.count + 1),
-                onDecrement: () {
-                  if (item.count > 1) {
-                    cartService.updateQuantity(item.id, item.count - 1);
-                  } else {
-                    _showRemoveConfirmation(context, cartService, item.id);
-                  }
-                },
-                onRemove: () => cartService.removeItem(item.id),
+                onInc: () => cart.updateQuantity(item.id, item.count + 1),
+                onDec: () => _handleDecrease(cart, item),
+                onDelete: () => _confirmDelete(cart, item.id),
               );
             },
           ),
         ),
-        _buildCheckoutSection(cartService),
+
+        _CheckoutBar(cart: cart),
       ],
     );
   }
 
-  Widget _buildCartItemCard({
-    required CartItem item,
-    required VoidCallback onIncrement,
-    required VoidCallback onDecrement,
-    required VoidCallback onRemove,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.brown[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.coffee, size: 30, color: Color(0xFF6F4E37)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.productName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${item.price.toStringAsFixed(2)} ₽',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6F4E37),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, size: 28),
-                      onPressed: onDecrement,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 30,
-                      child: Text(
-                        '${item.count}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline, size: 28),
-                      onPressed: onIncrement,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${item.totalPrice.toStringAsFixed(2)} ₽',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
-              onPressed: onRemove,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _handleDecrease(CartService cart, CartItem item) {
+    if (item.count > 1) {
+      cart.updateQuantity(item.id, item.count - 1);
+    } else {
+      _confirmDelete(cart, item.id);
+    }
   }
 
-  Widget _buildCheckoutSection(CartService cartService) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          if (cartService.bonusBalance > 0)
-            Row(
-              children: [
-                Checkbox(
-                  value: cartService.useBonuses,
-                  onChanged: (value) {
-                    cartService.toggleUseBonuses(value ?? false);
-                  },
-                  activeColor: const Color(0xFF6F4E37),
-                ),
-                Expanded(
-                  child: Text(
-                    'Использовать бонусы (${cartService.bonusBalance.toStringAsFixed(0)} бонусов)',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-                Text(
-                  '-${cartService.bonusToUse.toStringAsFixed(2)} ₽',
-                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Итого:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (cartService.bonusToUse > 0)
-                    Text(
-                      '${cartService.totalPrice.toStringAsFixed(2)} ₽',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  Text(
-                    '${cartService.finalPrice.toStringAsFixed(2)} ₽',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6F4E37),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: cartService.items.isEmpty
-                  ? null
-                  : () {
-                _showCheckoutDialog(context, cartService);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6F4E37),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Оформить заказ',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCheckoutDialog(BuildContext context, CartService cartService) {
-    final pickupTime = DateTime.now().add(const Duration(hours: 1));
-
+  void _confirmDelete(CartService cart, int id) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Оформление заказа'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Сумма: ${cartService.finalPrice.toStringAsFixed(2)} ₽'),
-            const SizedBox(height: 8),
-            Text('Время получения: ${_formatTime(pickupTime)}'),
-            const SizedBox(height: 8),
-            const Text('Заказ будет готов через 15-20 минут'),
-          ],
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
+        title: const Text('Удалить товар?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Отмена'),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(context);
-              // TODO: реализовать создание заказа через API
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Заказ оформлен! Спасибо!')),
-              );
-              cartService.clearCart();
+              cart.removeItem(id);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6F4E37),
-            ),
-            child: const Text('Подтвердить'),
+            style: AppButtons.danger,
+            child: const Text('Удалить'),
           ),
         ],
       ),
     );
   }
+}
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+// ================= ITEM =================
+
+class _CartItemTile extends StatelessWidget {
+  final CartItem item;
+  final VoidCallback onInc;
+  final VoidCallback onDec;
+  final VoidCallback onDelete;
+
+  const _CartItemTile({
+    required this.item,
+    required this.onInc,
+    required this.onDec,
+    required this.onDelete,
+  });
+
+  List<Map<String, dynamic>> _parseModifiers(String? jsonStr) {
+    if (jsonStr == null || jsonStr.isEmpty) return [];
+
+    try {
+      final decoded = jsonDecode(jsonStr);
+      return List<Map<String, dynamic>>.from(decoded);
+    } catch (_) {
+      return [];
+    }
   }
 
-  void _showRemoveConfirmation(BuildContext context, CartService cartService, int itemId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Удалить товар'),
-        content: const Text('Вы уверены, что хотите удалить этот товар из корзины?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              cartService.removeItem(itemId);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Удалить'),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    final modifiers = _parseModifiers(item.selectedModifiers);
+
+    final modifiersTotal = modifiers.fold<double>(
+      0,
+          (sum, m) => sum + ((m["price"] ?? 0) as num).toDouble(),
+    );
+
+    final totalPrice = (item.price + modifiersTotal) * item.count;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// INFO
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Название
+                  Text(
+                    item.productName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  /// Модификаторы
+                  if (modifiers.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    ...modifiers.map((m) => Text(
+                      '+ ${m["name"]} (${(m["price"] as num).toStringAsFixed(0)} ₽)',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    )),
+                  ],
+
+                  const SizedBox(height: 6),
+
+                  /// Цена
+                  Text(
+                    '${totalPrice.toStringAsFixed(0)} ₽',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.brown,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// QTY CONTROL
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(6),
+                    onPressed: onDec,
+                    icon: const Icon(Icons.remove, size: 18),
+                  ),
+                  Text(
+                    '${item.count}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  IconButton(
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(6),
+                    onPressed: onInc,
+                    icon: const Icon(Icons.add, size: 18),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 6),
+
+            /// DELETE
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ================= CHECKOUT =================
+
+class _CheckoutBar extends StatelessWidget {
+  final CartService cart;
+
+  const _CheckoutBar({required this.cart});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 10),
         ],
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Итого:'),
+                Text(
+                  '${cart.finalPrice.toStringAsFixed(2)} ₽',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.brown,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: cart.items.isEmpty
+                    ? null
+                    : () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Заказ оформлен')),
+                  );
+                  cart.clearCart();
+                },
+                style: AppButtons.primary,
+                child: const Text('Оформить заказ'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

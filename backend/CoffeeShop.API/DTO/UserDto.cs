@@ -38,4 +38,25 @@ namespace CoffeeShop.API.DTO
         public string? Email { get; set; }
         public string? Password { get; set; }
     }
+
+    public class UpdateNameDto
+    {
+        public required string Username { get; set; }
+    }
+
+    public class UpdatePhoneDto
+    {
+        public string? Phone { get; set; }
+    }
+
+    public class UpdateEmailDto
+    {
+        public required string Email { get; set; }
+    }
+
+    public class UpdatePasswordDto
+    {
+        public required string OldPassword { get; set; }
+        public required string NewPassword { get; set; }
+    }
 }

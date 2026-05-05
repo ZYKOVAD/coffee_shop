@@ -68,4 +68,14 @@ class StorageService {
   bool isLoggedIn() {
     return getAuthToken() != null && getUserId() != null;
   }
+
+  // Сохранить телефон
+  Future<void> setUserPhone(String phone) async {
+    await _prefs.setString('user_phone', phone);
+  }
+
+  // Получить телефон
+  String? getUserPhone() {
+    return _prefs.getString('user_phone');
+  }
 }

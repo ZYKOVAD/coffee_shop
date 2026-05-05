@@ -1,12 +1,14 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../utils/constants.dart';
 import '../models/cart_item.dart';
+import '../services/api_service.dart';
 import 'storage_service.dart';
+import 'dart:convert';
 
 class CartService extends ChangeNotifier {
   final StorageService _storage = StorageService();
+  ApiService _api;
+
+  CartService(this._api);
 
   List<CartItem> _items = [];
   bool _isLoading = false;
@@ -20,35 +22,41 @@ class CartService extends ChangeNotifier {
   bool get useBonuses => _useBonuses;
   double get bonusToUse => _bonusToUse;
 
-  // Общая сумма товаров
   double get totalPrice {
-    double sum = 0;
-    for (var item in _items) {
-      sum += item.totalPrice;
+    double total = 0;
+
+    for (final item in _items) {
+      double modifiersSum = 0;
+
+      if (item.selectedModifiers != null &&
+          item.selectedModifiers!.isNotEmpty) {
+        try {
+          final mods = jsonDecode(item.selectedModifiers!);
+
+          for (final m in mods) {
+            modifiersSum += (m["price"] ?? 0).toDouble();
+          }
+        } catch (_) {}
+      }
+
+      total += (item.price + modifiersSum) * item.count;
     }
-    return sum;
+
+    return total;
   }
 
-  // Итоговая сумма с учётом бонусов
   double get finalPrice {
-    double finalPrice = totalPrice - _bonusToUse;
-    return finalPrice < 0 ? 0 : finalPrice;
+    final price = totalPrice - _bonusToUse;
+    return price < 0 ? 0 : price;
   }
 
-  // Общее количество товаров
-  int get itemCount {
-    int count = 0;
-    for (var item in _items) {
-      count += item.count;
-    }
-    return count;
-  }
+  int get itemCount =>
+      _items.fold(0, (count, item) => count + item.count);
 
-  // Загрузить корзину из API (или из тестовых данных)
   Future<void> loadCart() async {
     final userId = _storage.getUserId();
+
     if (userId == null) {
-      // Если пользователь не авторизован, показываем пустую корзину
       _items = [];
       notifyListeners();
       return;
@@ -58,21 +66,9 @@ class CartService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = _storage.getAuthToken();
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/user/$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _items = (data as List).map((json) => CartItem.fromJson(json)).toList();
-      }
-
-      await _loadBonusBalance();
+      _items = await _api.getUserCart(userId);
+      _items.sort((a, b) => a.productId.compareTo(b.productId));
+      _bonusBalance = await _api.getUserBonus(userId);
     } catch (e) {
       print('Ошибка загрузки корзины: $e');
     }
@@ -81,141 +77,69 @@ class CartService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Загрузить бонусный баланс
-  Future<void> _loadBonusBalance() async {
-    final userId = _storage.getUserId();
-    if (userId == null) return;
-
-    try {
-      final token = _storage.getAuthToken();
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.userBonus}/$userId/bonus'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _bonusBalance = (data['bonusBalance'] ?? data['balance'] ?? 0).toDouble();
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Ошибка загрузки бонусов: $e');
-    }
-  }
-
-  // Добавить товар в корзину
   Future<void> addToCart({
     required int productId,
     int count = 1,
     String? selectedModifiers,
   }) async {
     final userId = _storage.getUserId();
-    if (userId == null) {
-      throw Exception('Пользователь не авторизован');
-    }
+    if (userId == null) throw Exception('Пользователь не авторизован');
 
-    try {
-      final token = _storage.getAuthToken();
-      final response = await http.post(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cartAdd}/$userId/add'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({
-          'productId': productId,
-          'count': count,
-          'selectedModifiers': selectedModifiers,
-        }),
-      );
+    await _api.addToCart(
+      userId: userId,
+      productId: productId,
+      count: count,
+      selectedModifiers: selectedModifiers ?? "[]", // ✅ ВАЖНО
+    );
 
-      if (response.statusCode == 200) {
-        await loadCart(); // Перезагружаем корзину
-      } else {
-        throw Exception('Ошибка добавления в корзину');
-      }
-    } catch (e) {
-      print('Ошибка добавления: $e');
-      rethrow;
-    }
+    await loadCart();
   }
 
-  // Обновить количество товара
   Future<void> updateQuantity(int cartItemId, int newCount) async {
-    if (newCount < 1) return;
-
-    try {
-      final token = _storage.getAuthToken();
-      final response = await http.put(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/$cartItemId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({'count': newCount}),
-      );
-
-      if (response.statusCode == 200) {
-        await loadCart();
-      }
-    } catch (e) {
-      print('Ошибка обновления количества: $e');
+    if (newCount < 1) {
+      await removeItem(cartItemId);
+      return;
     }
+
+    await _api.updateCartItem(
+      cartItemId: cartItemId,
+      count: newCount,
+    );
+
+    await loadCart();
   }
 
-  // Удалить товар из корзины
   Future<void> removeItem(int cartItemId) async {
-    try {
-      final token = _storage.getAuthToken();
-      final response = await http.delete(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/$cartItemId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        await loadCart();
-      }
-    } catch (e) {
-      print('Ошибка удаления: $e');
-    }
+    await _api.removeCartItem(cartItemId);
+    await loadCart();
   }
 
-  // Очистить всю корзину
   Future<void> clearCart() async {
     final userId = _storage.getUserId();
     if (userId == null) return;
 
-    try {
-      final token = _storage.getAuthToken();
-      await http.delete(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cartClear}/$userId/clear'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      await loadCart();
-    } catch (e) {
-      print('Ошибка очистки корзины: $e');
-    }
+    await _api.clearCart(userId);
+    await loadCart();
   }
 
-  // Включить/выключить использование бонусов
   void toggleUseBonuses(bool value) {
     _useBonuses = value;
+
     if (_useBonuses) {
-      // Можно использовать до 50% от суммы заказа или весь баланс, что меньше
-      _bonusToUse = (totalPrice * 0.5) < _bonusBalance ? totalPrice * 0.5 : _bonusBalance;
-      _bonusToUse = _bonusToUse > totalPrice ? totalPrice : _bonusToUse;
+      _bonusToUse = (totalPrice * 0.5) < _bonusBalance
+          ? totalPrice * 0.5
+          : _bonusBalance;
+
+      _bonusToUse =
+      _bonusToUse > totalPrice ? totalPrice : _bonusToUse;
     } else {
       _bonusToUse = 0;
     }
+
     notifyListeners();
+  }
+
+  void updateApi(ApiService api) {
+    _api = api;
   }
 }

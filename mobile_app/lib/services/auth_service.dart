@@ -1,31 +1,40 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import '../utils/constants.dart';
 import 'storage_service.dart';
 
+enum AuthStatus {
+  loading,
+  authenticated,
+  unauthenticated,
+}
+
 class AuthService extends ChangeNotifier {
-  final StorageService _storage = StorageService();
+  final StorageService _storage;
+  AuthService(this._storage);
 
   bool _isLoading = false;
   String? _error;
-  bool _isLoggedIn = false;
+  AuthStatus _status = AuthStatus.loading;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get isLoggedIn => _isLoggedIn;
+  AuthStatus get status => _status;
 
-  // Инициализация: проверяем, есть ли сохранённый токен
   Future<void> init() async {
-    _isLoggedIn = _storage.isLoggedIn();
+    final loggedIn = _storage.isLoggedIn();
+
+    _status = loggedIn
+        ? AuthStatus.authenticated
+        : AuthStatus.unauthenticated;
+
     notifyListeners();
   }
 
-  // Вход в систему
   Future<bool> login(String email, String password) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    _setLoading(true);
 
     try {
       final response = await http.post(
@@ -40,60 +49,49 @@ class AuthService extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // Ваш API может возвращать токен по-разному
-        String? token = data['token'];
-        if (token == null) token = data['accessToken'];
-        if (token == null) token = data['access_token'];
+        final token = data['token'] ??
+            data['accessToken'] ??
+            data['access_token'];
 
-        if (token != null) {
-          await _storage.setAuthToken(token);
-
-          // Получаем userId
-          int userId = data['userId'] ?? data['id'] ?? 0;
-          await _storage.setUserId(userId);
-
-          // Получаем email
-          await _storage.setUserEmail(email);
-
-          // Получаем имя
-          String userName = data['username'] ?? data['name'] ?? data['userName'] ?? 'Пользователь';
-          await _storage.setUserName(userName);
-
-          _isLoggedIn = true;
-          _isLoading = false;
-          notifyListeners();
-          return true;
-        } else {
-          _error = 'Не удалось получить токен авторизации';
-          _isLoading = false;
-          notifyListeners();
-          return false;
+        if (token == null) {
+          throw Exception('Нет токена');
         }
+
+        await _storage.setAuthToken(token);
+
+        final userId = data['userId'] ?? data['id'] ?? 0;
+        await _storage.setUserId(userId);
+
+        final userName = data['username'] ??
+            data['name'] ??
+            data['userName'] ??
+            'Пользователь';
+
+        await _storage.setUserName(userName);
+        await _storage.setUserEmail(email);
+
+        _status = AuthStatus.authenticated;
+        notifyListeners();
+        _setLoading(false);
+        return true;
       } else {
         final error = json.decode(response.body);
-        _error = error['message'] ?? error['title'] ?? 'Неверный email или пароль';
-        _isLoading = false;
-        notifyListeners();
+        _setError(error['message'] ?? 'Ошибка входа');
         return false;
       }
     } catch (e) {
-      _error = 'Ошибка соединения: $e';
-      _isLoading = false;
-      notifyListeners();
+      _setError('Ошибка соединения: $e');
       return false;
     }
   }
 
-  // Регистрация
   Future<bool> register({
     required String username,
     required String phone,
     required String email,
     required String password,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    _setLoading(true);
 
     try {
       final response = await http.post(
@@ -107,44 +105,46 @@ class AuthService extends ChangeNotifier {
         }),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // После регистрации автоматически входим
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
         return await login(email, password);
       } else {
         final error = json.decode(response.body);
-        _error = error['message'] ?? error['title'] ?? 'Ошибка регистрации';
-        _isLoading = false;
-        notifyListeners();
+        _setError(error['message'] ?? 'Ошибка регистрации');
         return false;
       }
     } catch (e) {
-      _error = 'Ошибка соединения: $e';
-      _isLoading = false;
-      notifyListeners();
+      _setError('Ошибка соединения: $e');
       return false;
     }
   }
 
-  // Выход из системы
   Future<void> logout() async {
     await _storage.clearUserData();
-    _isLoggedIn = false;
+
+    _status = AuthStatus.unauthenticated;
     notifyListeners();
   }
 
-  // Очистить ошибку
-  void clearError() {
-    _error = null;
+  void _setLoading(bool value) {
+    _isLoading = value;
+    if (value) _error = null;
     notifyListeners();
   }
 
-  // Получить имя пользователя
-  String? getUserName() {
-    return _storage.getUserName();
+  void _setError(String message) {
+    _error = message;
+    _isLoading = false;
+    notifyListeners();
   }
 
-  // Получить email пользователя
-  String? getUserEmail() {
-    return _storage.getUserEmail();
+
+  int? getUserId() => _storage.getUserId();
+  String? getUserName() => _storage.getUserName();
+  String? getUserEmail() => _storage.getUserEmail();
+  String? getUserPhone() => _storage.getUserPhone();
+
+  Future<void> setUserPhone(String phone) async {
+    await _storage.setUserPhone(phone);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:coffee_app/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'menu_screen.dart';
@@ -33,8 +34,8 @@ class _MainScreenState extends State<MainScreen> {
             _selectedIndex = index;
           });
         },
-        selectedItemColor: const Color(0xFF6F4E37),
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.brown,
+        unselectedItemColor: AppColors.grey,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

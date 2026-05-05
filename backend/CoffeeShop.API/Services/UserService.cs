@@ -199,7 +199,62 @@ public class UserService
         await _context.SaveChangesAsync();
 
         return MapToDto(user);
-    } 
+    }
+
+    public async Task<User?> UpdateUserNameAsync(int id, string? username)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return null;
+
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            user.Username = username;
+        }
+
+        await _context.SaveChangesAsync();
+        return user;
+    }
+
+    public async Task<User?> UpdateUserPhoneAsync(int id, string? phone)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return null;
+
+        user.Phone = phone;
+
+        await _context.SaveChangesAsync();
+        return user;
+    }
+
+    public async Task<User?> UpdateUserEmailAsync(int id, string email)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return null;
+
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Id != id);
+        if (existingUser != null)
+            throw new Exception("Email already exists");
+
+        user.Email = email;
+        await _context.SaveChangesAsync();
+        return user;
+    }
+
+    public async Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return false;
+
+        // Проверяем старый пароль
+        if (VerifyPassword(oldPassword, user.PasswordHash))
+            return false;
+
+        // Устанавливаем новый пароль
+        user.PasswordHash = HashPassword(newPassword);
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
     public async Task<bool> DeleteUserAsync(int id)
     {

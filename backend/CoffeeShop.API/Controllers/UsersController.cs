@@ -61,6 +61,89 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpPatch("{id}/name")]
+    [Authorize]
+    public async Task<IActionResult> UpdateName(int id, [FromBody] UpdateNameDto dto)
+    {
+        try
+        {
+            var user = await _userService.UpdateUserNameAsync(id, dto.Username);
+            if (user == null)
+                return NotFound(new { message = $"User with id {id} not found" });
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id}/phone")]
+    [Authorize]
+    public async Task<IActionResult> UpdatePhone(int id, [FromBody] UpdatePhoneDto dto)
+    {
+        try
+        {
+            var user = await _userService.UpdateUserPhoneAsync(id, dto.Phone);
+            if (user == null)
+                return NotFound(new { message = $"User with id {id} not found" });
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id}/email")]
+    [Authorize]
+    public async Task<IActionResult> UpdateEmail(int id, [FromBody] UpdateEmailDto dto)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest(new { error = "Email не может быть пустым" });
+
+            var user = await _userService.UpdateUserEmailAsync(id, dto.Email);
+            if (user == null)
+                return NotFound(new { message = $"User with id {id} not found" });
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id}/password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(int id, [FromBody] UpdatePasswordDto dto)
+    {
+        try
+        {
+            // Проверка валидации
+            if (string.IsNullOrWhiteSpace(dto.OldPassword))
+                return BadRequest(new { error = "Введите старый пароль" });
+
+            if (string.IsNullOrWhiteSpace(dto.NewPassword))
+                return BadRequest(new { error = "Введите новый пароль" });
+
+            if (dto.NewPassword.Length < 6)
+                return BadRequest(new { error = "Новый пароль должен быть не менее 6 символов" });
+
+            var result = await _userService.UpdatePasswordAsync(id, dto.OldPassword, dto.NewPassword);
+
+            if (!result)
+                return BadRequest(new { error = "Неверный старый пароль" });
+
+            return Ok(new { message = "Пароль успешно изменён" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> Delete(int id)

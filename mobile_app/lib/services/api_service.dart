@@ -1,20 +1,21 @@
-// api_service.dart - Реальные запросы к вашему .NET API
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/modifier.dart';
+
 import '../utils/constants.dart';
 import '../models/product.dart';
 import '../models/category.dart';
+import '../models/modifier.dart';
+import '../models/order.dart';
+import '../models/cart_item.dart';
 import '../models/user.dart';
 import 'storage_service.dart';
 
 class ApiService {
   final StorageService _storage = StorageService();
 
-  // Получить заголовки с токеном авторизации
-  Future<Map<String, String>> _getHeaders() async {
+  Future<Map<String, String>> _headers() async {
     final token = _storage.getAuthToken();
+
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -22,250 +23,267 @@ class ApiService {
     };
   }
 
-  // Обработка ответа от сервера
-  Future<dynamic> _handleResponse(http.Response response) async {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) {
-        return null;
+  Future<dynamic> _request(
+      String method,
+      String endpoint, {
+        Map<String, dynamic>? body,
+      }) async {
+    final url = Uri.parse('${AppConstants.apiUrl}$endpoint');
+
+    final headers = await _headers();
+
+    http.Response response;
+
+    try {
+      switch (method) {
+        case 'GET':
+          response = await http.get(url, headers: headers);
+          break;
+
+        case 'POST':
+          response = await http.post(
+            url,
+            headers: headers,
+            body: json.encode(body),
+          );
+          break;
+
+        case 'PUT':
+          response = await http.put(
+            url,
+            headers: headers,
+            body: json.encode(body),
+          );
+          break;
+
+        case 'PATCH':
+          response = await http.patch(
+            url,
+            headers: headers,
+            body: json.encode(body),
+          );
+          break;
+
+        case 'DELETE':
+          response = await http.delete(url, headers: headers);
+          break;
+
+        default:
+          throw Exception('Unsupported method');
       }
-      return json.decode(response.body);
-    } else {
-      String errorMessage;
-      try {
-        final error = json.decode(response.body);
-        errorMessage = error['message'] ?? error['title'] ?? 'Произошла ошибка';
-      } catch (e) {
-        errorMessage = 'Ошибка сервера: ${response.statusCode}';
-      }
-      throw Exception(errorMessage);
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('Ошибка сети: $e');
     }
   }
 
-  // Products
+  dynamic _handleResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return null;
+      return json.decode(response.body);
+    }
+
+    try {
+      final error = json.decode(response.body);
+      throw Exception(error['message'] ?? error['title'] ?? 'Ошибка сервера');
+    } catch (_) {
+      throw Exception('Ошибка: ${response.statusCode}');
+    }
+  }
 
   Future<List<Product>> getActiveProducts() async {
-    try {
-      print('📡 Запрос к: ${AppConstants.apiUrl}${AppConstants.productsActive}');
-
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.productsActive}'),
-        headers: await _getHeaders(),
-      );
-
-      print('📡 Ответ: ${response.statusCode}');
-      print('📡 Тело: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return (data as List).map((json) => Product.fromJson(json)).toList();
-      } else {
-        throw Exception('Ошибка: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Ошибка загрузки товаров: $e');
-      rethrow;
-    }
+    final data = await _request('GET', AppConstants.productsActive);
+    return (data as List).map((e) => Product.fromJson(e)).toList();
   }
 
   Future<List<Product>> getProductsByCategory(int categoryId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.productsByCategory}/$categoryId'),
-        headers: await _getHeaders(),
-      );
+    final data = await _request(
+      'GET',
+      '${AppConstants.productsByCategory}/$categoryId',
+    );
 
-      final data = await _handleResponse(response);
-      return (data as List).map((json) => Product.fromJson(json)).toList();
-    } catch (e) {
-      print('Ошибка загрузки товаров категории: $e');
-      rethrow;
-    }
+    return (data as List).map((e) => Product.fromJson(e)).toList();
   }
-
-  // Categories
 
   Future<List<Category>> getActiveCategories() async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.categoriesActive}'),
-        headers: await _getHeaders(),
-      );
-
-      final data = await _handleResponse(response);
-      return (data as List).map((json) => Category.fromJson(json)).toList();
-    } catch (e) {
-      print('Ошибка загрузки категорий: $e');
-      rethrow;
-    }
+    final data = await _request('GET', AppConstants.categoriesActive);
+    return (data as List).map((e) => Category.fromJson(e)).toList();
   }
-
-  // Modifiers
 
   Future<List<Modifier>> getModifiersByProduct(int productId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.modifiersByProduct}/$productId'),
-        headers: await _getHeaders(),
-      );
+    final data = await _request(
+      'GET',
+      '${AppConstants.modifiersByProduct}/$productId',
+    );
 
-      final data = await _handleResponse(response);
+    if (data == null) return [];
 
-      if (data == null) {
-        return [];
-      }
-
-      // Обработка разных форматов ответа
-      if (data is List) {
-        return data.map((json) => Modifier.fromJson(json)).toList();
-      } else if (data is Map && data['items'] is List) {
-        return (data['items'] as List).map((json) => Modifier.fromJson(json)).toList();
-      } else if (data is Map && data['modifiers'] is List) {
-        return (data['modifiers'] as List).map((json) => Modifier.fromJson(json)).toList();
-      }
-
-      return [];
-    } catch (e) {
-      print('Ошибка загрузки модификаторов для продукта $productId: $e');
-      return [];
+    if (data is List) {
+      return data.map((e) => Modifier.fromJson(e)).toList();
     }
+
+    if (data is Map && data['items'] is List) {
+      return (data['items'] as List)
+          .map((e) => Modifier.fromJson(e))
+          .toList();
+    }
+
+    if (data is Map && data['modifiers'] is List) {
+      return (data['modifiers'] as List)
+          .map((e) => Modifier.fromJson(e))
+          .toList();
+    }
+
+    return [];
   }
 
-  // Cart
+  Future<List<CartItem>> getUserCart(int userId) async {
+    final data =
+    await _request('GET', '${AppConstants.cart}/user/$userId');
 
-  Future<List<dynamic>> getUserCart(int userId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/user/$userId'),
-        headers: await _getHeaders(),
-      );
-
-      return await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка загрузки корзины: $e');
-      rethrow;
-    }
+    return (data as List).map((e) => CartItem.fromJson(e)).toList();
   }
 
-  Future<void> addToCart(int userId, int productId, int count, String? selectedModifiers) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cartAdd}/$userId/add'),
-        headers: await _getHeaders(),
-        body: json.encode({
-          'productId': productId,
-          'count': count,
-          if (selectedModifiers != null) 'selectedModifiers': selectedModifiers,
-        }),
-      );
-
-      await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка добавления в корзину: $e');
-      rethrow;
-    }
+  Future<void> addToCart({
+    required int userId,
+    required int productId,
+    int count = 1,
+    String? selectedModifiers,
+  }) async {
+    await _request(
+      'POST',
+      '${AppConstants.cartAdd}/$userId/add',
+      body: {
+        'productId': productId,
+        'count': count,
+        if (selectedModifiers != null)
+          'selectedModifiers': selectedModifiers,
+      },
+    );
   }
 
-  Future<void> updateCartItem(int cartItemId, int count, String? selectedModifiers) async {
-    try {
-      final response = await http.put(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/$cartItemId'),
-        headers: await _getHeaders(),
-        body: json.encode({
-          'count': count,
-          if (selectedModifiers != null) 'selectedModifiers': selectedModifiers,
-        }),
-      );
-
-      await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка обновления корзины: $e');
-      rethrow;
-    }
+  Future<void> updateCartItem({
+    required int cartItemId,
+    required int count,
+    String? selectedModifiers,
+  }) async {
+    await _request(
+      'PUT',
+      '${AppConstants.cart}/$cartItemId',
+      body: {
+        'count': count,
+        if (selectedModifiers != null)
+          'selectedModifiers': selectedModifiers,
+      },
+    );
   }
 
   Future<void> removeCartItem(int cartItemId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cart}/$cartItemId'),
-        headers: await _getHeaders(),
-      );
-
-      await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка удаления из корзины: $e');
-      rethrow;
-    }
+    await _request('DELETE', '${AppConstants.cart}/$cartItemId');
   }
 
   Future<void> clearCart(int userId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.cartClear}/$userId/clear'),
-        headers: await _getHeaders(),
-      );
-
-      await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка очистки корзины: $e');
-      rethrow;
-    }
+    await _request(
+      'DELETE',
+      '${AppConstants.cartClear}/$userId/clear',
+    );
   }
-
-  // Bonus
 
   Future<double> getUserBonus(int userId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.userBonus}/$userId/bonus'),
-        headers: await _getHeaders(),
-      );
+    final data = await _request(
+      'GET',
+      '${AppConstants.userBonus}/$userId/bonus',
+    );
 
-      final data = await _handleResponse(response);
-      return User.parseBonusFromJson(data);
-    } catch (e) {
-      print('Ошибка загрузки бонусов: $e');
-      return 0;
-    }
+    return User.parseBonusFromJson(data);
   }
 
-  // Orders
-
-  Future<dynamic> createOrder({
+  Future<Order> createOrder({
     required int userId,
     required DateTime pickupTime,
     String? clientComment,
     double bonusToUse = 0,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.orders}'),
-        headers: await _getHeaders(),
-        body: json.encode({
-          'userId': userId,
-          'pickupTime': pickupTime.toIso8601String(),
-          'clientComment': clientComment ?? '',
-          'bonusToUse': bonusToUse,
-        }),
-      );
+    final data = await _request(
+      'POST',
+      AppConstants.orders,
+      body: {
+        'userId': userId,
+        'pickupTime': pickupTime.toIso8601String(),
+        'clientComment': clientComment ?? '',
+        'bonusToUse': bonusToUse,
+      },
+    );
 
-      return await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка создания заказа: $e');
-      rethrow;
-    }
+    return Order.fromJson(data);
   }
 
-  Future<List<dynamic>> getUserOrders(int userId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiUrl}${AppConstants.orders}/user/$userId'),
-        headers: await _getHeaders(),
-      );
+  Future<List<Order>> getUserOrders(int userId) async {
+    final data =
+    await _request('GET', '${AppConstants.orders}/user/$userId');
 
-      return await _handleResponse(response);
-    } catch (e) {
-      print('Ошибка загрузки заказов: $e');
-      return [];
-    }
+    return (data as List).map((e) => Order.fromJson(e)).toList();
+  }
+
+  Future<User> getUser(int userId) async {
+    final data =
+    await _request('GET', '${AppConstants.users}/$userId');
+
+    return User.fromJson(data);
+  }
+
+  Future<void> updateUserName({
+    required int userId,
+    required String username,
+  }) async {
+    await _request(
+      'PATCH',
+      '${AppConstants.users}/$userId/name',
+      body: {'username': username},
+    );
+
+    await _storage.setUserName(username);
+  }
+
+  Future<void> updateUserPhone({
+    required int userId,
+    required String? phone,
+  }) async {
+    await _request(
+      'PATCH',
+      '${AppConstants.users}/$userId/phone',
+      body: {'phone': phone},
+    );
+
+    await _storage.setUserPhone(phone ?? '');
+  }
+
+  Future<void> updateUserEmail({
+    required int userId,
+    required String email,
+  }) async {
+    await _request(
+      'PATCH',
+      '${AppConstants.users}/$userId/email',
+      body: {'email': email},
+    );
+
+    await _storage.setUserEmail(email);
+  }
+
+  Future<void> updateUserPassword({
+    required int userId,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await _request(
+      'PATCH',
+      '${AppConstants.users}/$userId/password',
+      body: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+    );
   }
 }

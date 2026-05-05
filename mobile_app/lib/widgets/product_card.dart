@@ -1,130 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product.dart';
 import 'package:provider/provider.dart';
 import '../services/cart_service.dart';
 import '../services/auth_service.dart';
 import '../screens/auth_screen.dart';
 import '../screens/product_detail_screen.dart';
+import '../utils/colors.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
 
   const ProductCard({super.key, required this.product});
 
+  void _openDetails(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProductDetailScreen(product: product),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
-          ),
-        );
-      },
-      child: Container(
+        onTap: () => _openDetails(context),
+        child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Изображение
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.brown[50],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            // IMAGE
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
               ),
-              child: const Icon(Icons.coffee, size: 50, color: Color(0xFF6F4E37)),
+              child: _buildPlaceholder(),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-
-                  if (product.showStockInfo)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        product.stockText,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: product.countInStock == 0
-                              ? Colors.red
-                              : Colors.orange[700],
-                          fontWeight: FontWeight.w500,
-                        ),
+            // CONTENT
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // NAME
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.brown,
                       ),
                     ),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${product.price.toStringAsFixed(2)} ₽',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: product.isAvailable
-                              ? const Color(0xFF6F4E37)
-                              : Colors.grey,
-                        ),
-                      ),
+                    const Spacer(),
 
-                      if (product.isAvailable)
+                    // PRICE + BUTTON
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${product.price.toStringAsFixed(0)} ₽',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.brown,
+                          ),
+                        ),
+
                         InkWell(
                           onTap: () => _addToCart(context),
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6F4E37),
-                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.brown),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
                               Icons.add_shopping_cart,
-                              color: Colors.white,
                               size: 18,
+                              color: AppColors.brown,
                             ),
                           ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(
-                            Icons.block,
-                            color: Colors.grey,
-                            size: 18,
-                          ),
                         ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -138,7 +109,7 @@ class ProductCard extends StatelessWidget {
     final cartService = context.read<CartService>();
 
     // Проверка авторизации
-    if (!authService.isLoggedIn) {
+    if (authService.status != AuthStatus.authenticated) {
       final shouldLogin = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -171,16 +142,6 @@ class ProductCard extends StatelessWidget {
       }
     }
 
-    if (!product.isAvailable) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Товар временно недоступен'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     try {
       await cartService.addToCart(
         productId: product.id,
@@ -205,5 +166,26 @@ class ProductCard extends StatelessWidget {
         );
       }
     }
+  }
+
+  Widget _buildPlaceholder() {
+    return Image.asset(
+        'assets/images/cup.jpg',
+        height: 130,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 130,
+            width: double.infinity,
+            color: AppColors.sandLight,
+            child: const Icon(
+              Icons.coffee,
+              size: 50,
+              color: AppColors.sand,
+            ),
+          );
+        },
+    );
   }
 }

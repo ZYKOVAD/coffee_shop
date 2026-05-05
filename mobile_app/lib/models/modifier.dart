@@ -9,6 +9,14 @@ class Modifier {
     required this.price,
   });
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Modifier && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   factory Modifier.fromJson(Map<String, dynamic> json) {
     return Modifier(
       id: json['id'],

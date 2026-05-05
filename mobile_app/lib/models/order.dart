@@ -1,3 +1,5 @@
+import 'modifier.dart';
+
 enum OrderStatus {
   pending,
   confirmed,
@@ -27,24 +29,10 @@ enum OrderStatus {
   }
 
   static OrderStatus fromString(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return OrderStatus.pending;
-      case 'confirmed':
-        return OrderStatus.confirmed;
-      case 'preparing':
-        return OrderStatus.preparing;
-      case 'ready':
-        return OrderStatus.ready;
-      case 'completed':
-        return OrderStatus.completed;
-      case 'cancelled':
-        return OrderStatus.cancelled;
-      case 'rejected':
-        return OrderStatus.rejected;
-      default:
-        return OrderStatus.pending;
-    }
+    return OrderStatus.values.firstWhere(
+          (e) => e.name == status.toLowerCase(),
+      orElse: () => throw Exception('Unknown status: $status'),
+    );
   }
 }
 
@@ -99,7 +87,7 @@ class OrderItem {
   final int count;
   final double price;
   final double totalPrice;
-  final String? selectedModifiers;
+  final List<Modifier>? selectedModifiers;
 
   OrderItem({
     required this.id,
@@ -119,7 +107,11 @@ class OrderItem {
       count: json['count'] ?? 1,
       price: (json['price'] ?? 0).toDouble(),
       totalPrice: (json['totalPrice'] ?? json['total_price'] ?? 0).toDouble(),
-      selectedModifiers: json['selectedModifiers'] ?? json['selected_modifiers'],
+      selectedModifiers: json['selectedModifiers'] != null
+          ? (json['selectedModifiers'] as List)
+          .map((e) => Modifier.fromJson(e))
+          .toList()
+          : null,
     );
   }
 }

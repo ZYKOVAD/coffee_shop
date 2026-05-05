@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/auth_service.dart';
+import '../utils/colors.dart';
+import '../widgets/app_buttons.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool showCloseButton;
@@ -17,7 +20,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -38,11 +40,11 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authService = context.read<AuthService>();
+    final auth = context.read<AuthService>();
     bool success;
 
     if (_isLogin) {
-      success = await authService.login(
+      success = await auth.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -53,7 +55,8 @@ class _AuthScreenState extends State<AuthScreen> {
         );
         return;
       }
-      success = await authService.register(
+
+      success = await auth.register(
         username: _usernameController.text.trim(),
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
@@ -62,68 +65,82 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     if (success && mounted) {
-      Navigator.pop(context);
-    } else if (mounted && authService.error != null) {
+      Navigator.pop(context, true);
+    } else if (mounted && auth.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authService.error!)),
+        SnackBar(content: Text(auth.error!)),
       );
     }
+  }
+
+  InputDecoration _input(String label, IconData icon, {Widget? suffix}) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: AppColors.sand),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.sand, width: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
         title: Text(_isLogin ? 'Вход' : 'Регистрация'),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.brown,
+        elevation: 0,
         leading: widget.showCloseButton
             ? IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
         )
             : null,
-        elevation: 0,
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6F4E37).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.coffee,
-                  size: 50,
-                  color: Color(0xFF6F4E37),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const Icon(Icons.local_cafe,
+                  size: 90, color: AppColors.brown),
+
+              const SizedBox(height: 16),
 
               Text(
-                _isLogin ? 'Добро пожаловать!' : 'Создать аккаунт',
+                _isLogin ? 'Добро пожаловать' : 'Создание аккаунта',
                 style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.brown,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 6),
+
               Text(
                 _isLogin
                     ? 'Войдите чтобы продолжить'
-                    : 'Зарегистрируйтесь чтобы делать заказы',
-                style: TextStyle(color: Colors.grey[600]),
+                    : 'Зарегистрируйтесь для заказов',
+                style: const TextStyle(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 40),
+
+              const SizedBox(height: 30),
 
               Form(
                 key: _formKey,
@@ -132,131 +149,99 @@ class _AuthScreenState extends State<AuthScreen> {
                     if (!_isLogin) ...[
                       TextFormField(
                         controller: _usernameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Имя пользователя',
-                          prefixIcon: Icon(Icons.person_outline),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Введите имя пользователя';
-                          }
-                          return null;
-                        },
+                        decoration:
+                        _input('Имя пользователя', Icons.person_outline),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+
                       TextFormField(
                         controller: _phoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Телефон',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Введите номер телефона';
-                          }
-                          return null;
-                        },
+                        decoration:
+                        _input('Телефон', Icons.phone_outlined),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                     ],
 
                     TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Введите email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Введите корректный email';
-                        }
-                        return null;
-                      },
+                      decoration: _input('Email', Icons.email_outlined),
+                      validator: (v) =>
+                      v == null || !v.contains('@')
+                          ? 'Введите корректный email'
+                          : null,
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 12),
 
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Пароль',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      decoration: _input(
+                        'Пароль',
+                        Icons.lock_outline,
+                        suffix: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                         ),
-                        border: const OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Введите пароль';
-                        }
-                        if (!_isLogin && value.length < 6) {
-                          return 'Пароль должен быть не менее 6 символов';
-                        }
-                        return null;
-                      },
                     ),
 
                     if (!_isLogin) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+
                       TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        decoration: InputDecoration(
-                          labelText: 'Подтвердите пароль',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                            onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                        decoration: _input(
+                          'Подтвердите пароль',
+                          Icons.lock_outline,
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () => setState(() =>
+                            _obscureConfirmPassword =
+                            !_obscureConfirmPassword),
                           ),
-                          border: const OutlineInputBorder(),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Подтвердите пароль';
-                          }
-                          return null;
-                        },
                       ),
                     ],
                   ],
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 30),
 
               Consumer<AuthService>(
-                builder: (context, authService, child) {
-                  return ElevatedButton(
-                    onPressed: authService.isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6F4E37),
-                      minimumSize: const Size(double.infinity, 50),
+                builder: (context, auth, _) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: auth.isLoading ? null : _submit,
+                      style: AppButtons.primary,
+                      child: auth.isLoading
+                          ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Text(_isLogin ? 'Войти' : 'Создать аккаунт'),
                     ),
-                    child: authService.isLoading
-                        ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : Text(_isLogin ? 'Войти' : 'Зарегистрироваться'),
                   );
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               TextButton(
                 onPressed: () {
@@ -270,7 +255,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   });
                 },
                 child: Text(
-                  _isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти',
+                  _isLogin
+                      ? 'Нет аккаунта? Регистрация'
+                      : 'Уже есть аккаунт? Войти',
                 ),
               ),
             ],

@@ -25,7 +25,7 @@ class CartItem {
       productId: json['productId'] ?? json['product_id'] ?? 0,
       productName: json['productName'] ?? json['product_name'] ?? '',
       count: json['count'] ?? 1,
-      price: (json['price'] ?? 0).toDouble(),
+      price: (json['productPrice'] ?? json['price'] ?? 0).toDouble(),
       selectedModifiers: json['selectedModifiers'] ?? json['selected_modifiers'],
       imageUrl: json['imageUrl'] ?? json['img_url'] ?? '',
     );

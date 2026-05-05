@@ -33,6 +33,10 @@ class AppConstants {
   static const String userBonus = '/Users';
 
   static const String users = '/Users';
+  static const String updateName = '/Users';
+  static const String updatePhone = '/Users';
+  static const String updateEmail = '/Users';
+  static const String updatePassword = '/Users';
 
   // Storage keys
   static const String authTokenKey = 'auth_token';

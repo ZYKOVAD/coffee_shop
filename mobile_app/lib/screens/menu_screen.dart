@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../models/product.dart';
 import '../models/category.dart';
 import '../widgets/product_card.dart';
+import '../utils/colors.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -12,96 +14,115 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  final ApiService _apiService = ApiService();
+  final ApiService _api = ApiService();
 
   List<Category> _categories = [];
-  List<Product> _allProducts = [];
-  List<Product> _filteredProducts = [];
+  List<Product> _products = [];
+  List<Product> _filtered = [];
 
   int _selectedCategoryId = 0;
-  bool _isLoading = true;
+
+  bool _loading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _load();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _load() async {
     setState(() {
-      _isLoading = true;
+      _loading = true;
       _error = null;
     });
 
     try {
-      final results = await Future.wait([
-        _apiService.getActiveCategories(),
-        _apiService.getActiveProducts(),
+      final result = await Future.wait([
+        _api.getActiveCategories(),
+        _api.getActiveProducts(),
       ]);
 
-      final categories = results[0] as List<Category>;
-      final products = results[1] as List<Product>;
+      final categories = result[0] as List<Category>;
+      final products = result[1] as List<Product>;
 
       setState(() {
         _categories = categories;
-        _allProducts = products;
-        _filteredProducts = products;
-        _isLoading = false;
+        _products = products;
+        _filtered = products;
+        _loading = false;
       });
     } catch (e) {
       setState(() {
         _error = e.toString();
-        _isLoading = false;
+        _loading = false;
       });
     }
   }
 
-  void _filterByCategory(int categoryId) {
+  void _selectCategory(int id) {
     setState(() {
-      _selectedCategoryId = categoryId;
-      if (categoryId == 0) {
-        _filteredProducts = _allProducts;
-      } else {
-        _filteredProducts = _allProducts
-            .where((product) => product.categoryId == categoryId)
-            .toList();
-      }
+      _selectedCategoryId = id;
+
+      _filtered = id == 0
+          ? _products
+          : _products.where((p) => p.categoryId == id).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Меню'),
-        backgroundColor: const Color(0xFF6F4E37),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.brown,
+        elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? _buildErrorWidget()
-          : Column(
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return _buildError();
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        _buildCategories(),
+        const SizedBox(height: 12),
+        Expanded(child: _buildProducts()),
+      ],
+    );
+  }
+
+  // ================= CATEGORIES =================
+
+  Widget _buildCategories() {
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
-          _buildCategoriesList(),
-          Expanded(
-            child: _filteredProducts.isEmpty
-                ? const Center(
-              child: Text('Нет товаров в этой категории'),
-            )
-                : GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: _filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = _filteredProducts[index];
-                return ProductCard(product: product);
-              },
+          _CategoryChip(
+            label: 'Все',
+            selected: _selectedCategoryId == 0,
+            onTap: () => _selectCategory(0),
+          ),
+          ..._categories.map(
+                (c) => _CategoryChip(
+              label: c.name,
+              selected: _selectedCategoryId == c.id,
+              onTap: () => _selectCategory(c.id),
             ),
           ),
         ],
@@ -109,67 +130,102 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  Widget _buildCategoriesList() {
-    return SizedBox(
-      height: 50,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: _categories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return _buildCategoryChip(0, 'Все');
-          }
-          final category = _categories[index - 1];
-          return _buildCategoryChip(category.id, category.name);
-        },
+
+
+  // ================= PRODUCTS =================
+
+  Widget _buildProducts() {
+    if (_filtered.isEmpty) {
+      return const Center(
+        child: Text(
+          'Нет товаров',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.78,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
+      itemCount: _filtered.length,
+      itemBuilder: (context, index) {
+        return ProductCard(product: _filtered[index]);
+      },
     );
   }
 
-  Widget _buildCategoryChip(int id, String label) {
-    final isSelected = _selectedCategoryId == id;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (selected) {
-            _filterByCategory(id);
-          }
-        },
-        backgroundColor: Colors.grey[100],
-        selectedColor: const Color(0xFF6F4E37),
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : Colors.black87,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  // ================= ERROR =================
+
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 12),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black87),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _load,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.sand,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Повторить'),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildErrorWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 60, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            _error!,
-            style: const TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
+// ================= CATEGORY CHIP =================
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.brown : Colors.grey.shade300,
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadData,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6F4E37),
-            ),
-            child: const Text('Попробовать снова'),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? AppColors.brown : Colors.grey,
+            fontWeight: FontWeight.w600,
           ),
-        ],
+        ),
       ),
     );
   }
