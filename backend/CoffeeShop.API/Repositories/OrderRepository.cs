@@ -44,6 +44,18 @@ public class OrderRepository
             .ToListAsync();
     }
 
+    public async Task<List<Order>> GetUserActiveOrdersAsync(int userId, string[] statuses)
+    {
+        return await _dbSet
+            .Where(o =>
+                o.UserId == userId &&
+                statuses.Contains(o.Status))
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+            .OrderBy(o => o.PickupTime)
+            .ToListAsync();
+    }
+
     public async Task<List<Order>> GetByStatusAsync(string status)
     {
         return await _dbSet

@@ -26,6 +26,27 @@ public class OrdersController : ControllerBase
         return Ok(orders);
     }
 
+    [HttpGet("me/active")]
+    public async Task<IActionResult> GetMyActiveOrders()
+    {
+        var userId = GetCurrentUserId();
+
+        var activeStatuses = new[]
+        {
+        "pending",
+        "confirmed",
+        "paid",
+        "preparing",
+        "ready"
+    };
+
+        var orders = await _orderService.GetUserActiveOrdersAsync(
+            userId,
+            activeStatuses);
+
+        return Ok(orders);
+    }
+
     [HttpGet]
     [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> GetAll()
@@ -72,7 +93,9 @@ public class OrdersController : ControllerBase
     {
         try
         {
-            var order = await _orderService.CreateOrderFromCartAsync(createDto);
+            var userId = GetCurrentUserId();
+
+            var order = await _orderService.CreateOrderFromCartAsync(userId, createDto);
             return Ok(order);
         }
         catch (Exception ex)
@@ -81,46 +104,46 @@ public class OrdersController : ControllerBase
         }
     }
 
-    [HttpPost("{orderId}/confirm")]
-    [Authorize(Roles = "admin,barista")]
-    public async Task<IActionResult> ConfirmOrder(int orderId, [FromBody] string? comment)
-    {
-        try
-        {
-            var order = await _orderService.ConfirmOrderByBaristaAsync(orderId, comment);
-            if (order == null)
-                return NotFound(new { message = $"Order with id {orderId} not found" });
-            return Ok(order);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
+    //[HttpPost("{orderId}/confirm")]
+    //[Authorize(Roles = "admin,barista")]
+    //public async Task<IActionResult> ConfirmOrder(int orderId, [FromBody] string? comment)
+    //{
+    //    try
+    //    {
+    //        var order = await _orderService.ConfirmOrderByBaristaAsync(orderId, comment);
+    //        if (order == null)
+    //            return NotFound(new { message = $"Order with id {orderId} not found" });
+    //        return Ok(order);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new { error = ex.Message });
+    //    }
+    //}
 
-    [HttpPost("{orderId}/reject")]
-    [Authorize(Roles = "admin,barista")]
-    public async Task<IActionResult> RejectOrder(int orderId, [FromBody] string comment)
-    {
-        try
-        {
-            var order = await _orderService.RejectOrderByBaristaAsync(orderId, comment);
-            if (order == null)
-                return NotFound(new { message = $"Order with id {orderId} not found" });
-            return Ok(order);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
+    //[HttpPost("{orderId}/reject")]
+    //[Authorize(Roles = "admin,barista")]
+    //public async Task<IActionResult> RejectOrder(int orderId, [FromBody] string comment)
+    //{
+    //    try
+    //    {
+    //        var order = await _orderService.RejectOrderByBaristaAsync(orderId, comment);
+    //        if (order == null)
+    //            return NotFound(new { message = $"Order with id {orderId} not found" });
+    //        return Ok(order);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new { error = ex.Message });
+    //    }
+    //}
 
     [HttpPut("{orderId}/status")]
     public async Task<IActionResult> UpdateStatus(int orderId, [FromBody] UpdateOrderStatusDto updateDto)
     {
         try
         {
-            var order = await _orderService.UpdateOrderStatusAsync(orderId, updateDto.Status, updateDto.Comment);
+            var order = await _orderService.UpdateOrderStatusAsync(orderId, updateDto.Status, updateDto.BaristaComment);
             if (order == null)
                 return NotFound(new { message = $"Order with id {orderId} not found" });
             return Ok(order);

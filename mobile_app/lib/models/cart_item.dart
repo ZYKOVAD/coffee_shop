@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class CartItem {
   final int id;
   final int productId;

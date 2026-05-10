@@ -1,4 +1,5 @@
 import 'package:coffee_app/screens/main_screen.dart';
+import 'package:coffee_app/services/coffee_status_service.dart';
 import 'package:coffee_app/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,9 +7,12 @@ import 'services/storage_service.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'services/api_service.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  tz.initializeTimeZones();
 
   final storage = StorageService();
   await storage.init();
@@ -33,6 +37,10 @@ class MyApp extends StatelessWidget {
             auth.init();
             return auth;
           },
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => CoffeeStatusService()..load(),
         ),
 
         ChangeNotifierProxyProvider<ApiService, CartService>(

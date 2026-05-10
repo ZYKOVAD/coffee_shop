@@ -31,6 +31,8 @@ namespace CoffeeShop.API.Models
         public string ClientComment { get; set; } = string.Empty;
         [Column("Created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column("Order_number")]
+        public int OrderNumber { get; set; }
         public virtual User User { get; set; } = null!;
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public virtual ICollection<BonusTransaction> BonusTransactions { get; set; } = new List<BonusTransaction>();

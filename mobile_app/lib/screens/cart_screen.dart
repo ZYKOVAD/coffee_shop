@@ -4,10 +4,14 @@ import 'package:provider/provider.dart';
 import '../services/cart_service.dart';
 import '../services/auth_service.dart';
 import '../models/cart_item.dart';
+import '../services/coffee_status_service.dart';
 import '../utils/colors.dart';
 import '../widgets/app_buttons.dart';
+import '../widgets/work_status_banner.dart';
 import 'auth_screen.dart';
 import 'dart:convert';
+
+import 'checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -20,7 +24,9 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    _init();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
 
   Future<void> _init() async {
@@ -45,15 +51,19 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+
       appBar: AppBar(
         title: const Text('Корзина'),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.brown,
         elevation: 0,
+        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
       ),
-      body: Consumer2<CartService, AuthService>(
-        builder: (context, cart, auth, _) {
+      body: Consumer3<CartService, AuthService, CoffeeStatusService>(
+        builder: (context, cart, auth, coffee, _) {
           if (auth.status == AuthStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -70,7 +80,7 @@ class _CartScreenState extends State<CartScreen> {
             return _buildEmpty();
           }
 
-          return _buildCart(cart);
+          return _buildCart(cart, coffee);
         },
       ),
     );
@@ -117,7 +127,10 @@ class _CartScreenState extends State<CartScreen> {
 
   // ================= CART =================
 
-  Widget _buildCart(CartService cart) {
+  Widget _buildCart(
+      CartService cart,
+      CoffeeStatusService coffee,
+      ) {
     return Column(
       children: [
         Expanded(
@@ -138,7 +151,11 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
 
-        _CheckoutBar(cart: cart),
+        _CheckoutBar(
+          cart: cart,
+          canOrder: coffee.canOrder,
+          statusText: coffee.statusText,
+        ),
       ],
     );
   }
@@ -313,8 +330,14 @@ class _CartItemTile extends StatelessWidget {
 
 class _CheckoutBar extends StatelessWidget {
   final CartService cart;
+  final bool canOrder;
+  final String statusText;
 
-  const _CheckoutBar({required this.cart});
+  const _CheckoutBar({
+    required this.cart,
+    required this.canOrder,
+    required this.statusText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -345,16 +368,25 @@ class _CheckoutBar extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            WorkStatusBanner(
+              canOrder: canOrder,
+              statusText: statusText,
+            ),
+
+            const SizedBox(height: 12),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: cart.items.isEmpty
+                onPressed: cart.items.isEmpty || !canOrder
                     ? null
                     : () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Заказ оформлен')),
-                  );
-                  cart.clearCart();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CheckoutScreen(),
+                        ),
+                      );
                 },
                 style: AppButtons.primary,
                 child: const Text('Оформить заказ'),

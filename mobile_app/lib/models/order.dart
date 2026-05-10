@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'modifier.dart';
 
 enum OrderStatus {
@@ -7,31 +9,13 @@ enum OrderStatus {
   ready,
   completed,
   cancelled,
-  rejected;
-
-  String get displayName {
-    switch (this) {
-      case OrderStatus.pending:
-        return 'Ожидает';
-      case OrderStatus.confirmed:
-        return 'Подтверждён';
-      case OrderStatus.preparing:
-        return 'Готовится';
-      case OrderStatus.ready:
-        return 'Готов к выдаче';
-      case OrderStatus.completed:
-        return 'Завершён';
-      case OrderStatus.cancelled:
-        return 'Отменён';
-      case OrderStatus.rejected:
-        return 'Отклонён';
-    }
-  }
+  rejected,
+  notPickedUp;
 
   static OrderStatus fromString(String status) {
     return OrderStatus.values.firstWhere(
           (e) => e.name == status.toLowerCase(),
-      orElse: () => throw Exception('Unknown status: $status'),
+        orElse: () => OrderStatus.pending,
     );
   }
 }
@@ -47,6 +31,7 @@ class Order {
   final String? baristaComment;
   final String? clientComment;
   final DateTime createdAt;
+  final int orderNumber;
   final List<OrderItem> items;
 
   Order({
@@ -60,6 +45,7 @@ class Order {
     this.baristaComment,
     this.clientComment,
     required this.createdAt,
+    required this.orderNumber,
     required this.items,
   });
 
@@ -75,6 +61,7 @@ class Order {
       baristaComment: json['baristaComment'] ?? json['barista_comment'],
       clientComment: json['clientComment'] ?? json['client_comment'],
       createdAt: DateTime.parse(json['createdAt'] ?? json['created_at']),
+      orderNumber: json['orderNumber'] ?? json['order_number'] ?? 0,
       items: (json['items'] as List?)?.map((i) => OrderItem.fromJson(i)).toList() ?? [],
     );
   }
@@ -100,6 +87,20 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    List<dynamic> modifiersJson = [];
+
+    final raw = json['selectedModifiers'];
+
+    if (raw is String && raw.isNotEmpty) {
+      try {
+        modifiersJson = jsonDecode(raw);
+      } catch (_) {
+        modifiersJson = [];
+      }
+    } else if (raw is List) {
+      modifiersJson = raw;
+    }
+
     return OrderItem(
       id: json['id'],
       productId: json['productId'] ?? json['product_id'] ?? 0,
@@ -107,11 +108,9 @@ class OrderItem {
       count: json['count'] ?? 1,
       price: (json['price'] ?? 0).toDouble(),
       totalPrice: (json['totalPrice'] ?? json['total_price'] ?? 0).toDouble(),
-      selectedModifiers: json['selectedModifiers'] != null
-          ? (json['selectedModifiers'] as List)
+      selectedModifiers: modifiersJson
           .map((e) => Modifier.fromJson(e))
-          .toList()
-          : null,
+          .toList(),
     );
   }
 }

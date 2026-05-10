@@ -58,6 +58,14 @@ public class OrderService
         return orders.Select(o => MapToDto(o)).ToList();
     }
 
+    public async Task<List<OrderDto>> GetUserActiveOrdersAsync(int userId, string[] statuses)
+    {
+        var orders = await _orderRepository
+            .GetUserActiveOrdersAsync(userId, statuses);
+
+        return orders.Select(o => MapToDto(o)).ToList();
+    }
+
     public async Task<List<OrderDto>> GetOrdersByStatusAsync(string status)
     {
         var orders = await _orderRepository.GetByStatusAsync(status);
@@ -70,15 +78,15 @@ public class OrderService
         return orders.Select(o => MapToDto(o)).ToList();
     }
 
-    public async Task<OrderDto> CreateOrderFromCartAsync(CreateOrderDto createDto)
+    public async Task<OrderDto> CreateOrderFromCartAsync(int userId, CreateOrderDto createDto)
     {
         // Get user
-        var user = await _userRepository.GetByIdAsync(createDto.UserId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
-            throw new Exception($"User with id {createDto.UserId} not found");
+            throw new Exception($"User with id {userId} not found");
 
         // Get cart items
-        var cartItems = await _cartItemRepository.GetByUserIdAsync(createDto.UserId);
+        var cartItems = await _cartItemRepository.GetByUserIdAsync(userId);
         if (!cartItems.Any())
             throw new Exception("Cart is empty");
 
@@ -124,7 +132,7 @@ public class OrderService
         // Create order
         var order = new Order
         {
-            UserId = createDto.UserId,
+            UserId = userId,
             Status = "pending",
             TotalPrice = finalPrice,
             BonusUsed = bonusToUse,
@@ -135,6 +143,11 @@ public class OrderService
         };
 
         await _orderRepository.AddAsync(order);
+        await _context.SaveChangesAsync();
+
+        order.OrderNumber = 1000 + order.Id;
+
+        _orderRepository.Update(order);
         await _context.SaveChangesAsync();
 
         // Add order items
@@ -148,19 +161,19 @@ public class OrderService
         if (bonusToUse > 0)
         {
             await _bonusTransactionService.RedeemBonusesAsync(
-                createDto.UserId,
+                userId,
                 order.Id,
                 bonusToUse,
                 $"Списание {bonusToUse} бонусов за заказ #{order.Id}");
         }
 
         // Clear cart
-        await _cartItemRepository.ClearUserCartAsync(createDto.UserId);
+        await _cartItemRepository.ClearUserCartAsync(userId);
         await _context.SaveChangesAsync();
 
         // Create notification
         await _notificationService.CreateOrderStatusNotificationAsync(
-            createDto.UserId,
+            userId,
             order.Id,
             "pending",
             "Ваш заказ создан и ожидает подтверждения бариста");
@@ -168,57 +181,57 @@ public class OrderService
         return MapToDto(order);
     }
 
-    public async Task<OrderDto?> ConfirmOrderByBaristaAsync(int orderId, string? comment)
-    {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        if (order == null)
-            return null;
+    //public async Task<OrderDto?> ConfirmOrderByBaristaAsync(int orderId, string? comment)
+    //{
+    //    var order = await _orderRepository.GetByIdAsync(orderId);
+    //    if (order == null)
+    //        return null;
 
-        if (order.Status != "pending")
-            throw new Exception($"Order cannot be confirmed from status '{order.Status}'");
+    //    if (order.Status != "pending")
+    //        throw new Exception($"Order cannot be confirmed from status '{order.Status}'");
 
-        order.Status = "confirmed";
-        order.BaristaComment = comment;
+    //    order.Status = "confirmed";
+    //    order.BaristaComment = comment;
 
-        _orderRepository.Update(order);
-        await _context.SaveChangesAsync();
+    //    _orderRepository.Update(order);
+    //    await _context.SaveChangesAsync();
 
-        // Create notification for user
-        await _notificationService.CreateOrderStatusNotificationAsync(
-            order.UserId,
-            order.Id,
-            "confirmed",
-            comment ?? "Ваш заказ подтвержден. Ожидайте оплаты.");
+    //    // Create notification for user
+    //    await _notificationService.CreateOrderStatusNotificationAsync(
+    //        order.UserId,
+    //        order.Id,
+    //        "confirmed",
+    //        comment ?? "Ваш заказ подтвержден. Ожидайте оплаты.");
 
-        return MapToDto(order);
-    }
+    //    return MapToDto(order);
+    //}
 
-    public async Task<OrderDto?> RejectOrderByBaristaAsync(int orderId, string comment)
-    {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        if (order == null)
-            return null;
+    //public async Task<OrderDto?> RejectOrderByBaristaAsync(int orderId, string comment)
+    //{
+    //    var order = await _orderRepository.GetByIdAsync(orderId);
+    //    if (order == null)
+    //        return null;
 
-        if (order.Status != "pending")
-            throw new Exception($"Order cannot be rejected from status '{order.Status}'");
+    //    if (order.Status != "pending")
+    //        throw new Exception($"Order cannot be rejected from status '{order.Status}'");
 
-        order.Status = "rejected";
-        order.BaristaComment = comment;
+    //    order.Status = "rejected";
+    //    order.BaristaComment = comment;
 
-        _orderRepository.Update(order);
-        await _context.SaveChangesAsync();
+    //    _orderRepository.Update(order);
+    //    await _context.SaveChangesAsync();
 
-        // Create notification for user
-        await _notificationService.CreateOrderStatusNotificationAsync(
-            order.UserId,
-            order.Id,
-            "rejected",
-            comment);
+    //    // Create notification for user
+    //    await _notificationService.CreateOrderStatusNotificationAsync(
+    //        order.UserId,
+    //        order.Id,
+    //        "rejected",
+    //        comment);
 
-        return MapToDto(order);
-    }
+    //    return MapToDto(order);
+    //}
 
-    public async Task<OrderDto?> UpdateOrderStatusAsync(int orderId, string status, string? comment = null)
+    public async Task<OrderDto?> UpdateOrderStatusAsync(int orderId, string status, string? baristaComment = null)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
         if (order == null)
@@ -229,8 +242,8 @@ public class OrderService
             throw new Exception($"Invalid status '{status}'");
 
         order.Status = status;
-        if (comment != null)
-            order.BaristaComment = comment;
+        if (baristaComment != null)
+            order.BaristaComment = baristaComment;
 
         _orderRepository.Update(order);
 
@@ -310,6 +323,7 @@ public class OrderService
             BaristaComment = order.BaristaComment,
             ClientComment = order.ClientComment,
             CreatedAt = order.CreatedAt,
+            OrderNumber = order.OrderNumber,
             Items = order.OrderItems?.Select(oi => new OrderItemDto
             {
                 Id = oi.Id,

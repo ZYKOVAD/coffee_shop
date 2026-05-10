@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Modifier> Modifiers { get; set; }
+    public DbSet<WorkingHours> WorkingHours { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

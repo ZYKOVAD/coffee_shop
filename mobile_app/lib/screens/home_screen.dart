@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 
+import '../models/order.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
+import '../services/coffee_status_service.dart';
+import '../services/order_status_extension.dart';
 import '../widgets/product_card.dart';
 import '../utils/colors.dart';
+import '../widgets/work_status_banner.dart';
+import 'order_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   int _currentBannerIndex = 0;
   String? _error;
+
+  List<Order> _activeOrders = [];
+  bool _loadingOrders = true;
 
   final List<BannerItem> _banners = [
     BannerItem(
@@ -46,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadPopularProducts();
+    _loadActiveOrders();
   }
 
   Future<void> _loadPopularProducts() async {
@@ -68,10 +78,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadActiveOrders() async {
+    try {
+      final orders = await _apiService.getMyActiveOrders();
+      setState(() {
+        _activeOrders = orders;
+      });
+    } catch (e) {} finally {
+      setState(() {
+        _loadingOrders = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
 
       appBar: AppBar(
         title: const Text('Casa Busano'),
@@ -79,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.brown,
+        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
       ),
 
       body: RefreshIndicator(
@@ -89,21 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
             SliverToBoxAdapter(child: _buildBanner()),
 
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Text(
-                    'Популярное',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brown,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            SliverToBoxAdapter(child: _buildStatusBanner()),
+
+            SliverToBoxAdapter(child: _buildActiveOrders()),
+
+            SliverToBoxAdapter(child: _buildPopular()),
 
             if (_isLoading)
               const SliverToBoxAdapter(
@@ -179,6 +194,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildStatusBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Consumer<CoffeeStatusService>(
+        builder: (context, coffee, _) {
+          if (coffee.canOrder) return const SizedBox.shrink();
+
+          return WorkStatusBanner(
+            canOrder: coffee.canOrder,
+            statusText: coffee.statusText,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _bannerCard(BannerItem b) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6),
@@ -222,6 +253,67 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildActiveOrders() {
+    if (_loadingOrders) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_activeOrders.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Активные заказы',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.brown,
+            ),
+          ),
+        ),
+
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            scrollDirection: Axis.horizontal,
+            itemCount: _activeOrders.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, i) {
+              final order = _activeOrders[i];
+
+              return _OrderCard(order: order);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPopular() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Text(
+          'Популярное',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.brown,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _errorWidget() {
     return Center(
       child: Column(
@@ -252,4 +344,143 @@ class BannerItem {
     required this.color,
     required this.icon,
   });
+}
+
+class _OrderCard extends StatelessWidget {
+  final Order order;
+
+  const _OrderCard({required this.order});
+
+  String _buildItemsPreview() {
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < order.items.length && i < 2; i++) {
+      final item = order.items[i];
+
+      buffer.writeln('• ${item.productName} x${item.count}');
+
+      if (item.selectedModifiers != null &&
+          item.selectedModifiers!.isNotEmpty) {
+        buffer.writeln(
+          '   + ${item.selectedModifiers!.map((m) => m.name).join(', ')}',
+        );
+      }
+    }
+
+    if (order.items.length > 2) {
+      buffer.writeln('...');
+    }
+
+    return buffer.toString().trim();
+  }
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final itemsPreview = _buildItemsPreview();
+
+    return Container(
+      width: 220,
+      height: 150,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => OrderDetailScreen(order: order),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            Text(
+              'Заказ #${order.orderNumber}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Expanded(
+              child: ShaderMask(
+                shaderCallback: (rect) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      Colors.black,
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.8, 1.0],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Text(
+                  itemsPreview,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: order.status.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    order.status.displayName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: order.status.color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              'Время выдачи: ${_formatTime(order.pickupTime)}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

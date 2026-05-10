@@ -6,7 +6,7 @@ class AppButtons {
   static final primary = ElevatedButton.styleFrom(
     backgroundColor: AppColors.brown,
     foregroundColor: Colors.white,
-    minimumSize: const Size(double.infinity, 50),
+    minimumSize: const Size(0, 50),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     ),
@@ -20,7 +20,7 @@ class AppButtons {
   static final secondary = OutlinedButton.styleFrom(
     foregroundColor: AppColors.brown,
     side: const BorderSide(color: AppColors.brown),
-    minimumSize: const Size(double.infinity, 50),
+    minimumSize: const Size(0, 50),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     ),
@@ -34,7 +34,7 @@ class AppButtons {
   static final danger = OutlinedButton.styleFrom(
     foregroundColor: Colors.red,
     side: const BorderSide(color: Colors.red),
-    minimumSize: const Size(double.infinity, 50),
+    minimumSize: const Size(0, 50),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     ),

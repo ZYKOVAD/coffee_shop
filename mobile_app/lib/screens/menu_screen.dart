@@ -73,13 +73,16 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
+
       appBar: AppBar(
         title: const Text('Меню'),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.brown,
         elevation: 0,
+        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
       ),
       body: _buildBody(),
     );

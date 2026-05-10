@@ -13,12 +13,12 @@
         public string? BaristaComment { get; set; }
         public string? ClientComment { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int OrderNumber { get; set; }
         public List<OrderItemDto> Items { get; set; } = new();
     }
 
     public class CreateOrderDto
     {
-        public int UserId { get; set; }
         public DateTime PickupTime { get; set; }
         public string? ClientComment { get; set; }
         public decimal BonusToUse { get; set; } = 0;
@@ -26,14 +26,8 @@
 
     public class UpdateOrderStatusDto
     {
-        public string Status { get; set; } = string.Empty;
-        public string? Comment { get; set; }
-    }
-
-    public class OrderStatusUpdateDto
-    {
         public int OrderId { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string? Comment { get; set; }
+        public string? BaristaComment { get; set; }
     }
 }

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -145,13 +144,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final cart = context.watch<CartService>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
+
       appBar: AppBar(
         title: const Text('Профиль'),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.brown,
         elevation: 0,
+        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
       ),
       body: auth.status == AuthStatus.loading
           ? const Center(child: CircularProgressIndicator())

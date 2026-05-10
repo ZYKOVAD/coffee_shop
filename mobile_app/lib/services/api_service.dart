@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../models/working_hours.dart';
 import '../utils/constants.dart';
 import '../models/product.dart';
 import '../models/category.dart';
@@ -74,7 +75,7 @@ class ApiService {
 
       return _handleResponse(response);
     } catch (e) {
-      throw Exception('Ошибка сети: $e');
+      rethrow;
     }
   }
 
@@ -199,26 +200,6 @@ class ApiService {
     return User.parseBonusFromJson(data);
   }
 
-  Future<Order> createOrder({
-    required int userId,
-    required DateTime pickupTime,
-    String? clientComment,
-    double bonusToUse = 0,
-  }) async {
-    final data = await _request(
-      'POST',
-      AppConstants.orders,
-      body: {
-        'userId': userId,
-        'pickupTime': pickupTime.toIso8601String(),
-        'clientComment': clientComment ?? '',
-        'bonusToUse': bonusToUse,
-      },
-    );
-
-    return Order.fromJson(data);
-  }
-
   Future<List<Order>> getUserOrders(int userId) async {
     final data =
     await _request('GET', '${AppConstants.orders}/user/$userId');
@@ -285,5 +266,58 @@ class ApiService {
         'newPassword': newPassword,
       },
     );
+  }
+
+  Future<List<Order>> getMyOrders() async {
+    final data = await _request(
+      'GET',
+      '${AppConstants.orders}/me',
+    );
+
+    return (data as List)
+        .map((e) => Order.fromJson(e))
+        .toList();
+  }
+
+  Future<List<Order>> getMyActiveOrders() async {
+    final data = await _request(
+      'GET',
+      '${AppConstants.orders}/me/active',
+    );
+
+    return (data as List)
+        .map((e) => Order.fromJson(e))
+        .toList();
+  }
+
+  Future<Order> createOrder({
+    required DateTime pickupTime,
+    String? clientComment,
+    double bonusToUse = 0,
+  }) async {
+    final data = await _request(
+      'POST',
+      AppConstants.orders,
+      body: {
+        'pickupTime': pickupTime.toUtc().toIso8601String(),
+        'clientComment': clientComment ?? '',
+        'bonusToUse': bonusToUse,
+      },
+    );
+
+    return Order.fromJson(data);
+  }
+
+  Future<List<WorkingHours>> getWorkingHours() async {
+    final data = await _request(
+      'GET',
+      AppConstants.workingHours,
+    );
+
+    if (data == null) return [];
+
+    return (data as List)
+        .map((e) => WorkingHours.fromJson(e))
+        .toList();
   }
 }

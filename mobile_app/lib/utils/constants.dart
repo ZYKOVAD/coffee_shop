@@ -43,4 +43,6 @@ class AppConstants {
   static const String userIdKey = 'user_id';
   static const String userEmailKey = 'user_email';
   static const String userNameKey = 'user_name';
+
+  static const workingHours = '/WorkingHours';
 }
