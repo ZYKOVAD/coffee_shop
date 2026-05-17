@@ -9,6 +9,8 @@ class AppConstants {
   static const String login = '/Auth/login';
   static const String register = '/Auth/register';
 
+  static const String coffeeShop  = '/CoffeeShop/1';
+
   static const String products = '/Products';
   static const String productsActive = '/Products/active';
   static const String productsByCategory = '/Products/category';

@@ -1,3 +1,4 @@
+import 'package:coffee_app/services/order_service.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
@@ -472,7 +473,7 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(height: 4),
 
             Text(
-              'Время выдачи: ${_formatTime(order.pickupTime)}',
+              'Время выдачи: ${_formatTime(toMoscowTime(order.pickupTime))}',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade600,

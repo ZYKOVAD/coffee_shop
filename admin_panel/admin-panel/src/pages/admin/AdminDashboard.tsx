@@ -1,0 +1,11 @@
+export default function AdminDashboard() {
+  return (
+    <div>
+      <h1>Admin Dashboard</h1>
+
+      <p>
+        Добро пожаловать в панель администратора
+      </p>
+    </div>
+  );
+}

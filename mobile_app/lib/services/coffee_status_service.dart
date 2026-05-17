@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '../models/working_hours.dart';
+import '../models/coffee_shop.dart';
 import '../services/api_service.dart';
 import '../services/order_service.dart';
 
 class CoffeeStatusService extends ChangeNotifier {
   final ApiService _api = ApiService();
 
-  WorkingHours? workingHours;
+  CoffeeShop? coffeeShop;
+  CoffeeShop? get shop => coffeeShop;
 
   bool isLoading = true;
 
   Future<void> load() async {
     try {
-      final data = await _api.getWorkingHours();
+      final data = await _api.getCoffeeShop();
 
-      workingHours = data.first;
+      coffeeShop = data;
     } catch (_) {
-      workingHours = null;
+      coffeeShop = null;
     }
 
     isLoading = false;
@@ -26,20 +27,22 @@ class CoffeeStatusService extends ChangeNotifier {
   }
 
   bool get canOrder {
-    if (workingHours == null) return false;
+    if (coffeeShop == null) {
+      return false;
+    }
 
     return OrderAvailabilityService.canOrder(
-      workingHours!,
+      coffeeShop!,
     );
   }
 
   String get statusText {
-    if (workingHours == null) {
+    if (coffeeShop == null) {
       return 'Не удалось загрузить статус кофейни';
     }
 
     return OrderAvailabilityService.statusText(
-      workingHours!,
+      coffeeShop!,
     );
   }
 }

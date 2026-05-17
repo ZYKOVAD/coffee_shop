@@ -1,8 +1,11 @@
 import 'package:timezone/timezone.dart' as tz;
-
-import '../models/working_hours.dart';
+import '../models/coffee_shop.dart';
 
 final _moscow = tz.getLocation('Europe/Moscow');
+
+tz.TZDateTime toMoscowTime(DateTime dt) {
+  return tz.TZDateTime.from(dt, _moscow);
+}
 
 class OrderAvailabilityService {
   static tz.TZDateTime now() {
@@ -10,9 +13,9 @@ class OrderAvailabilityService {
   }
 
   static tz.TZDateTime? firstAvailableSlot(
-      WorkingHours wh,
+      CoffeeShop shop,
       ) {
-    final slots = buildSlots(wh);
+    final slots = buildSlots(shop);
 
     if (slots.isEmpty) return null;
 
@@ -43,7 +46,7 @@ class OrderAvailabilityService {
   }
 
   static tz.TZDateTime minAllowedTime(
-      WorkingHours wh,
+      CoffeeShop shop,
       ) {
     final current = now();
 
@@ -52,8 +55,8 @@ class OrderAvailabilityService {
       current.year,
       current.month,
       current.day,
-      wh.openHour,
-      wh.openMinute,
+      shop.openHour,
+      shop.openMinute,
     ).add(const Duration(minutes: 5));
 
     final nowPlus = _roundToNextFiveMinutes(
@@ -68,7 +71,7 @@ class OrderAvailabilityService {
   }
 
   static tz.TZDateTime maxAllowedTime(
-      WorkingHours wh,
+      CoffeeShop shop,
       ) {
     final current = now();
 
@@ -77,27 +80,27 @@ class OrderAvailabilityService {
       current.year,
       current.month,
       current.day,
-      wh.closeHour,
-      wh.closeMinute,
+      shop.closeHour,
+      shop.closeMinute,
     ).subtract(const Duration(minutes: 10));
   }
 
-  static bool canOrder(WorkingHours wh) {
-    if (wh.isClosed) return false;
+  static bool canOrder(CoffeeShop shop) {
+    if (!shop.isActive) return false;
 
-    final min = minAllowedTime(wh);
-    final max = maxAllowedTime(wh);
+    final min = minAllowedTime(shop);
+    final max = maxAllowedTime(shop);
 
     return !min.isAfter(max);
   }
 
   static List<tz.TZDateTime> buildSlots(
-      WorkingHours wh,
+      CoffeeShop shop,
       ) {
-    if (!canOrder(wh)) return [];
+    if (!canOrder(shop)) return [];
 
-    final min = minAllowedTime(wh);
-    final max = maxAllowedTime(wh);
+    final min = minAllowedTime(shop);
+    final max = maxAllowedTime(shop);
 
     final slots = <tz.TZDateTime>[];
 
@@ -111,12 +114,12 @@ class OrderAvailabilityService {
     return slots;
   }
 
-  static String statusText(WorkingHours wh) {
-    if (wh.isClosed) {
+  static String statusText(CoffeeShop shop) {
+    if (!shop.isActive) {
       return 'Кофейня сегодня закрыта';
     }
 
-    if (!canOrder(wh)) {
+    if (!canOrder(shop)) {
       return 'На сегодня заказы недоступны';
     }
 

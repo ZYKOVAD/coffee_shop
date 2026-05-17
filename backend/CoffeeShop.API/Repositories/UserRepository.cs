@@ -6,12 +6,10 @@ namespace CoffeeShop.API.Repositories;
 
 public class UserRepository
 {
-    private readonly AppDbContext _context;
     private readonly DbSet<User> _dbSet;
 
     public UserRepository(AppDbContext context)
     {
-        _context = context;
         _dbSet = context.Set<User>();
     }
 

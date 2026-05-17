@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/order.dart';
+import '../services/coffee_status_service.dart';
+import '../services/order_service.dart';
 import '../services/order_status_extension.dart';
 import '../utils/colors.dart';
+
 
 class OrderDetailScreen extends StatelessWidget {
   final Order order;
@@ -22,6 +26,8 @@ class OrderDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final coffee = context.watch<CoffeeStatusService>();
+    final shop = coffee.shop;
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
 
@@ -73,7 +79,7 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
 
                       Text(
-                        _formatTime(order.pickupTime),
+                        _formatTime(toMoscowTime(order.pickupTime)),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -253,7 +259,7 @@ class OrderDetailScreen extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     _PaymentRow(
-                      title: 'Списано бонусов',
+                      title: 'Бонусов к списанию',
                       value:
                       '- ${order.bonusUsed.toStringAsFixed(0)} ₽',
                       valueColor: Colors.green,
@@ -263,7 +269,7 @@ class OrderDetailScreen extends StatelessWidget {
                   const SizedBox(height: 10),
 
                   _PaymentRow(
-                    title: 'Начислено бонусов',
+                    title: 'Бонусов к начислению',
                     value:
                     '+ ${order.bonusEarned.toStringAsFixed(0)}',
                     valueColor: AppColors.brown,
@@ -289,6 +295,13 @@ class OrderDetailScreen extends StatelessWidget {
                   _InfoRow(
                     title: 'Создан',
                     value: _formatDate(order.createdAt),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  _InfoRow(
+                    title: 'Адресс кофейни',
+                    value: shop!.adress,
                   ),
                 ],
               ),

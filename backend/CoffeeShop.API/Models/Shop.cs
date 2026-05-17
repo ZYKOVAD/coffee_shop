@@ -3,19 +3,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CoffeeShop.API.Models
 {
-    public class WorkingHours
+    public class Shop
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
-        public TimeSpan OpenTime { get; set; }
+        public string Adress { get; set; } = string.Empty;
 
         [Required]
-        public TimeSpan CloseTime { get; set; }
+        public TimeOnly Open { get; set; }
 
         [Required]
-        public bool IsClosed { get; set; } = false;
+        public TimeOnly Close { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; } = false;
     }
 }

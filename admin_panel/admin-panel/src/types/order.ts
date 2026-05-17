@@ -1,0 +1,22 @@
+export interface OrderItem {
+  id: number;
+  productName: string;
+  count: number;
+  price: number;
+  totalPrice: number;
+}
+
+export interface Order {
+  id: number;
+  userId: number;
+  userName: string;
+  email: string;
+  status: string;
+  totalPrice: number;
+  bonusUsed: number;
+  bonusEarned: number;
+  pickupTime: string;
+  createdAt: string;
+  orderNumber: number;
+  items: OrderItem[];
+}

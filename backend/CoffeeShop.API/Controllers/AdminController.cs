@@ -113,6 +113,7 @@ public class AdminController : ControllerBase
     }
 
     // Создание администратора 
+    [AllowAnonymous]
     [HttpPost("admin")]
     public async Task<IActionResult> CreateAdmin([FromBody] RegisterRequestDto request)
     {

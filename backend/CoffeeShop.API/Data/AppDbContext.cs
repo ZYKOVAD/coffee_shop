@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Modifier> Modifiers { get; set; }
-    public DbSet<WorkingHours> WorkingHours { get; set; }
+    public DbSet<Shop> Shops { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,8 +68,6 @@ public class AppDbContext : DbContext
             entity.HasIndex(p => p.CategoryId);
             entity.HasIndex(p => p.IsActive);
         });
-
-
 
         modelBuilder.Entity<OrderItem>(entity =>
         {

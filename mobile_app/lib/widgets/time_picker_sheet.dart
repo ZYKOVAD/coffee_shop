@@ -2,17 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import '../models/working_hours.dart';
+import '../models/coffee_shop.dart';
 import '../services/order_service.dart';
 import '../widgets/app_buttons.dart';
 
 class TimePickerSheet extends StatefulWidget {
-  final WorkingHours workingHours;
+  final CoffeeShop coffeeShop;
   final tz.TZDateTime initialTime;
 
   const TimePickerSheet({
     super.key,
-    required this.workingHours,
+    required this.coffeeShop,
     required this.initialTime,
   });
 
@@ -28,7 +28,7 @@ class _TimePickerSheetState extends State<TimePickerSheet> {
   void initState() {
     super.initState();
 
-    slots = OrderAvailabilityService.buildSlots(widget.workingHours);
+    slots = OrderAvailabilityService.buildSlots(widget.coffeeShop);
 
     if (slots.isEmpty) {
       selectedIndex = 0;

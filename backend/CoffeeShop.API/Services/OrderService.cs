@@ -181,56 +181,6 @@ public class OrderService
         return MapToDto(order);
     }
 
-    //public async Task<OrderDto?> ConfirmOrderByBaristaAsync(int orderId, string? comment)
-    //{
-    //    var order = await _orderRepository.GetByIdAsync(orderId);
-    //    if (order == null)
-    //        return null;
-
-    //    if (order.Status != "pending")
-    //        throw new Exception($"Order cannot be confirmed from status '{order.Status}'");
-
-    //    order.Status = "confirmed";
-    //    order.BaristaComment = comment;
-
-    //    _orderRepository.Update(order);
-    //    await _context.SaveChangesAsync();
-
-    //    // Create notification for user
-    //    await _notificationService.CreateOrderStatusNotificationAsync(
-    //        order.UserId,
-    //        order.Id,
-    //        "confirmed",
-    //        comment ?? "Ваш заказ подтвержден. Ожидайте оплаты.");
-
-    //    return MapToDto(order);
-    //}
-
-    //public async Task<OrderDto?> RejectOrderByBaristaAsync(int orderId, string comment)
-    //{
-    //    var order = await _orderRepository.GetByIdAsync(orderId);
-    //    if (order == null)
-    //        return null;
-
-    //    if (order.Status != "pending")
-    //        throw new Exception($"Order cannot be rejected from status '{order.Status}'");
-
-    //    order.Status = "rejected";
-    //    order.BaristaComment = comment;
-
-    //    _orderRepository.Update(order);
-    //    await _context.SaveChangesAsync();
-
-    //    // Create notification for user
-    //    await _notificationService.CreateOrderStatusNotificationAsync(
-    //        order.UserId,
-    //        order.Id,
-    //        "rejected",
-    //        comment);
-
-    //    return MapToDto(order);
-    //}
-
     public async Task<OrderDto?> UpdateOrderStatusAsync(int orderId, string status, string? baristaComment = null)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
@@ -315,6 +265,7 @@ public class OrderService
             Id = order.Id,
             UserId = order.UserId,
             UserName = order.User?.Username ?? string.Empty,
+            Email = order.User?.Email ?? string.Empty,
             Status = order.Status,
             TotalPrice = order.TotalPrice,
             BonusUsed = order.BonusUsed,

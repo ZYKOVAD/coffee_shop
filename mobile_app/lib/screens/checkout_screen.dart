@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import '../models/working_hours.dart';
+import '../models/coffee_shop.dart';
 import '../services/cart_service.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -32,39 +32,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   tz.TZDateTime? _pickupTime;
 
-  WorkingHours? _workingHours;
+  CoffeeShop? _coffeeShop;
   bool _loadingHours = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadWorkingHours();
+    _loadCoffeeShop();
   }
 
-  Future<void> _loadWorkingHours() async {
+  Future<void> _loadCoffeeShop() async {
     try {
       final api = context.read<ApiService>();
-      final data = await api.getWorkingHours();
+      final shop = await api.getCoffeeShop();
 
-      final hours = data.first;
-      final firstSlot = OrderAvailabilityService.firstAvailableSlot(hours);
+      final firstSlot =
+      OrderAvailabilityService.firstAvailableSlot(
+        shop!,
+      );
 
       setState(() {
-        _workingHours = hours;
+        _coffeeShop = shop;
         _pickupTime = firstSlot;
         _loadingHours = false;
       });
     } catch (_) {
       setState(() {
-        _workingHours = null;
+        _coffeeShop = null;
         _loadingHours = false;
       });
     }
   }
 
   Future<void> _selectTime() async {
-    if (_pickupTime == null || _workingHours == null) {
+    if (_pickupTime == null || _coffeeShop == null) {
       return;
     }
 
@@ -73,7 +75,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       isScrollControlled: true,
       builder: (_) {
         return TimePickerSheet(
-          workingHours: _workingHours!,
+          coffeeShop: _coffeeShop!,
           initialTime: _pickupTime!,
         );
       },
@@ -228,7 +230,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ],
                   ),
 
-                  if (_workingHours == null && !_loadingHours)
+                  if (_coffeeShop == null && !_loadingHours)
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
                       child: Text(

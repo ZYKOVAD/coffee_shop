@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../models/working_hours.dart';
+import '../models/coffee_shop.dart';
 import '../utils/constants.dart';
 import '../models/product.dart';
 import '../models/category.dart';
@@ -308,16 +308,14 @@ class ApiService {
     return Order.fromJson(data);
   }
 
-  Future<List<WorkingHours>> getWorkingHours() async {
+  Future<CoffeeShop?> getCoffeeShop() async {
     final data = await _request(
       'GET',
-      AppConstants.workingHours,
+      AppConstants.coffeeShop,
     );
 
-    if (data == null) return [];
+    if (data == null) return null;
 
-    return (data as List)
-        .map((e) => WorkingHours.fromJson(e))
-        .toList();
+    return CoffeeShop.fromJson(data);
   }
 }

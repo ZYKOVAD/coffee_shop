@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public decimal TotalPrice { get; set; }
         public decimal BonusUsed { get; set; }

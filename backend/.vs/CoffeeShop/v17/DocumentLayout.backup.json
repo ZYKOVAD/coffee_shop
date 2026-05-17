@@ -1,24 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\uni\\diplom\\coffee_shop\\backend\\coffeeshop.api\\services\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\services\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\uni\\diplom\\coffee_shop\\backend\\coffeeshop.api\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\uni\\diplom\\coffee_shop\\backend\\coffeeshop.api\\dto\\orderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\dto\\orderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|c:\\users\\darisha\\documents\\uni\\diplom\\coffee_shop\\backend\\coffeeshop.api\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CC600779-D95D-4DA6-931A-80686669ACFD}|CoffeeShop.API\\CoffeeShop.API.csproj|solutionrelative:coffeeshop.api\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -26,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -43,58 +26,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Order.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Order.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Models\\Order.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Models\\Order.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Models\\Order.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T07:55:58.159Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "OrderDto.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\DTO\\OrderDto.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\DTO\\OrderDto.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\DTO\\OrderDto.cs",
-              "RelativeToolTip": "CoffeeShop.API\\DTO\\OrderDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T07:51:48.914Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "OrdersController.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\OrdersController.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Controllers\\OrdersController.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Controllers\\OrdersController.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Controllers\\OrdersController.cs",
-              "ViewState": "AgIAAE8AAAAAAAAAAAAAAFsAAABFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T07:40:31.084Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "OrderService.cs",
-              "DocumentMoniker": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Services\\OrderService.cs",
-              "RelativeDocumentMoniker": "CoffeeShop.API\\Services\\OrderService.cs",
-              "ToolTip": "C:\\Users\\Darisha\\Documents\\UNI\\diplom\\coffee_shop\\backend\\CoffeeShop.API\\Services\\OrderService.cs",
-              "RelativeToolTip": "CoffeeShop.API\\Services\\OrderService.cs",
-              "ViewState": "AgIAAHwAAAAAAAAAAAASwI0AAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T07:52:01.111Z",
-              "EditorCaption": ""
             }
           ]
         },
