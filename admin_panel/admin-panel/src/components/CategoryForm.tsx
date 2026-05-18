@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 interface Props {
   title: string;
 
@@ -28,6 +30,9 @@ export default function CategoryForm({
   showIsActive = false,
   onSubmit,
 }: Props) {
+
+  const navigate = useNavigate();
+
   const [name, setName] = useState(
     initialData?.name || ""
   );
@@ -50,9 +55,21 @@ export default function CategoryForm({
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>
-          {title}
-        </h1>
+        <div style={styles.header}>
+          <h1 style={styles.title}>
+            {title}
+          </h1>
+
+          <button
+            type="button"
+            style={styles.closeButton}
+            onClick={() =>
+              navigate("/admin/categories")
+            }
+          >
+            ×
+          </button>
+        </div>
 
         <form
           onSubmit={handleSubmit}
@@ -119,7 +136,6 @@ const styles: Record<string, React.CSSProperties> =
     },
 
     title: {
-      marginBottom: "24px",
       color: "#442D25",
       fontSize: "32px",
       fontWeight: 700,
@@ -160,5 +176,26 @@ const styles: Record<string, React.CSSProperties> =
       fontSize: "16px",
       fontWeight: 600,
       cursor: "pointer",
+    },
+
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "24px",
+    },
+
+    closeButton: {
+      width: "40px",
+      height: "40px",
+      borderRadius: "50%",
+      border: "none",
+      backgroundColor: "#f3f3f3",
+      color: "#442D25",
+      fontSize: "26px",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
     },
   };

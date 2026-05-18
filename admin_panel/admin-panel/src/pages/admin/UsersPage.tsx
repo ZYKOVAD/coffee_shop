@@ -21,7 +21,9 @@ export default function UsersPage() {
     try {
       const data = await getUsers();
 
-      setUsers(data);
+      setUsers(
+        data.filter((x) => x.role === "user")
+      );
     } catch (error) {
       console.error(error);
 
@@ -90,7 +92,7 @@ export default function UsersPage() {
                 </td>
 
                 <td style={styles.td}>
-                  {user.phoneNumber}
+                  {user.phone}
                 </td>
 
                 <td style={styles.td}>

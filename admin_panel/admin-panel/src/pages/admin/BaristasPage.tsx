@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 
 import {
-  getBaristas,
+  getUsers,
   deleteBarista,
 } from "../../api/usersApi";
 
-import type { Barista } from "../../api/usersApi";
+import type { User } from "../../types/user";
 
 import { useNavigate } from "react-router-dom";
 
 export default function BaristasPage() {
-  const [baristas, setBaristas] = useState<Barista[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -21,23 +21,25 @@ export default function BaristasPage() {
 
   const load = async () => {
     try {
-      const data = await getBaristas();
-      setBaristas(data);
+      const data = await getUsers();
+      setUsers(
+        data.filter((x) => x.role !== "user")
+      );
     } catch (err) {
       console.error(err);
-      alert("Ошибка загрузки бариста");
+      alert("Ошибка загрузки сотрудников");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    const ok = confirm("Удалить бариста?");
+    const ok = confirm("Удалить сотрудника?");
     if (!ok) return;
 
     try {
       await deleteBarista(id);
-      setBaristas(prev => prev.filter(x => x.id !== id));
+      setUsers(prev => prev.filter(x => x.id !== id));
     } catch (err) {
       console.error(err);
       alert("Ошибка удаления");
@@ -49,7 +51,7 @@ export default function BaristasPage() {
   return (
     <div>
       <div style={styles.header}>
-        <h1 style={styles.title}>Бариста</h1>
+        <h1 style={styles.title}>Сотрудники</h1>
 
         <button
           style={styles.createBtn}
@@ -67,17 +69,19 @@ export default function BaristasPage() {
               <th style={styles.th}>Username</th>
               <th style={styles.th}>Email</th>
               <th style={styles.th}>Телефон</th>
+              <th style={styles.th}>Роль</th>
               <th style={styles.th}>Действия</th>
             </tr>
           </thead>
 
           <tbody>
-            {baristas.map((b) => (
+            {users.map((b) => (
               <tr key={b.id}>
                 <td style={styles.td}>{b.id}</td>
                 <td style={styles.td}>{b.username}</td>
                 <td style={styles.td}>{b.email}</td>
-                <td style={styles.td}>{b.phoneNumber}</td>
+                <td style={styles.td}>{b.phone}</td>
+                <td style={styles.td}>{b.role}</td>
 
                 <td style={styles.td}>
                   <button

@@ -15,6 +15,8 @@ export interface Order {
   totalPrice: number;
   bonusUsed: number;
   bonusEarned: number;
+  baristaComment: string,
+  clientComment: string,
   pickupTime: string;
   createdAt: string;
   orderNumber: number;

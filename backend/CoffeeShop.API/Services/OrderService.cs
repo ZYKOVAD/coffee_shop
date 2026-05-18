@@ -187,7 +187,7 @@ public class OrderService
         if (order == null)
             return null;
 
-        var validStatuses = new[] { "confirmed", "paid", "preparing", "ready", "completed", "cancelled" };
+        var validStatuses = new[] { "pending", "confirmed", "paid", "preparing", "ready", "completed", "cancelled", "rejected", "notPickedUp"};
         if (!validStatuses.Contains(status))
             throw new Exception($"Invalid status '{status}'");
 
@@ -210,38 +210,38 @@ public class OrderService
         await _context.SaveChangesAsync();
 
         // Create notification for user
-        var message = GetStatusMessage(status);
-        await _notificationService.CreateOrderStatusNotificationAsync(
-            order.UserId,
-            order.Id,
-            status,
-            message);
+        //var message = GetStatusMessage(status);
+        //await _notificationService.CreateOrderStatusNotificationAsync(
+        //    order.UserId,
+        //    order.Id,
+        //    status,
+        //    message);
 
         return MapToDto(order);
     }
 
-    public async Task<OrderDto?> MarkAsPaidAsync(int orderId)
-    {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        if (order == null)
-            return null;
+    //public async Task<OrderDto?> MarkAsPaidAsync(int orderId)
+    //{
+    //    var order = await _orderRepository.GetByIdAsync(orderId);
+    //    if (order == null)
+    //        return null;
 
-        if (order.Status != "confirmed")
-            throw new Exception($"Order cannot be paid from status '{order.Status}'");
+    //    if (order.Status != "confirmed")
+    //        throw new Exception($"Order cannot be paid from status '{order.Status}'");
 
-        order.Status = "paid";
+    //    order.Status = "paid";
 
-        _orderRepository.Update(order);
-        await _context.SaveChangesAsync();
+    //    _orderRepository.Update(order);
+    //    await _context.SaveChangesAsync();
 
-        await _notificationService.CreateOrderStatusNotificationAsync(
-            order.UserId,
-            order.Id,
-            "paid",
-            "Заказ оплачен. Бариста приступит к приготовлению.");
+    //    await _notificationService.CreateOrderStatusNotificationAsync(
+    //        order.UserId,
+    //        order.Id,
+    //        "paid",
+    //        "Заказ оплачен. Бариста приступит к приготовлению.");
 
-        return MapToDto(order);
-    }
+    //    return MapToDto(order);
+    //}
 
     private string GetStatusMessage(string status)
     {

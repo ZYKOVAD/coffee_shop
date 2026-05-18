@@ -30,13 +30,15 @@ export default function Login() {
 
       login(data);
 
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else if (data.role === "barista") {
-        navigate("/barista");
-      } else {
-        navigate("/");
-      }
+      setTimeout(() => {
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else if (data.role === "barista") {
+          navigate("/barista/orders");
+        } else {
+          navigate("/");
+        }
+      }, 0);
     } catch (err) {
       console.log(err);
       setError("Неверный email или пароль");

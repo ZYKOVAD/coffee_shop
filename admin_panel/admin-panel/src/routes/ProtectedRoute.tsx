@@ -11,10 +11,13 @@ interface Props {
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
   const { user, isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" />;
+  }
 
-  if (allowedRoles && !allowedRoles.includes(user!.role)) {
-    return <Navigate to="/admin" />;
+  if (allowedRoles && !allowedRoles.includes(user.role)
+  ) {
+    return <Navigate to="/login" />;
   }
 
   return <>{children}</>;

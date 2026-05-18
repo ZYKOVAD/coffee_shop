@@ -1,11 +1,29 @@
 import { useEffect, useState } from "react";
-import { getOrders } from "../../api/ordersApi";
+import { getOrders, updateOrderStatus } from "../../api/ordersApi";
 import type { Order } from "../../types/order";
+
+
+const statuses = [
+  "all",
+  "pending",
+  "confirmed",
+  "paid",
+  "preparing",
+  "ready",
+  "completed",
+  "cancelled",
+  "rejected",
+  "notPickedUp",
+];
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [comments, setComments] = useState<
+    Record<number, string>
+  >({});
 
   useEffect(() => {
     loadOrders();
@@ -25,9 +43,66 @@ export default function OrdersPage() {
 
   if (loading) return <div>Loading...</div>;
 
+  const filteredOrders =
+    statusFilter === "all"
+      ? orders
+      : orders.filter(
+          (x) => x.status === statusFilter
+        );
+
+  const handleStatusChange = async (
+    orderId: number,
+    newStatus: string
+  ) => {
+    try {
+      await updateOrderStatus(
+        orderId,
+        newStatus,
+        comments[orderId] || ""
+      );
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId
+            ? {
+                ...order,
+                status: newStatus,
+                baristaComment:
+                  comments[orderId] || "",
+              }
+            : order
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Ошибка изменения статуса");
+    }
+  };
+
   return (
     <div>
       <h1 style={styles.title}>Заказы</h1>
+
+      <div style={styles.filters}>
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value)
+          }
+          style={styles.select}
+        >
+          {statuses.map((status) => (
+            <option
+              key={status}
+              value={status}
+            >
+              {status === "all"
+                ? "Все статусы"
+                : status}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div style={styles.tableWrapper}>
         <table style={styles.table}>
@@ -38,13 +113,14 @@ export default function OrdersPage() {
               <th style={styles.th}>Email</th>
               <th style={styles.th}>Сумма</th>
               <th style={styles.th}>Статус</th>
+              <th style={styles.th}>Комментарий</th>
               <th style={styles.th}>Дата</th>
               <th style={styles.th}>Детали</th>
             </tr>
           </thead>
 
           <tbody>
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <>
                 <tr key={order.id}>
                   <td style={styles.td}>
@@ -64,18 +140,44 @@ export default function OrdersPage() {
                   </td>
 
                   <td style={styles.td}>
-                    <span
+                    <select
+                      value={order.status}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          order.id,
+                          e.target.value
+                        )
+                      }
                       style={{
                         ...styles.status,
-                        ...(order.status === "pending"
-                          ? styles.pending
-                          : order.status === "completed"
-                          ? styles.completed
-                          : styles.cancelled),
+                        ...getStatusStyle(order.status),
                       }}
                     >
-                      {order.status}
-                    </span>
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+
+                  <td style={styles.td}>
+                    <input
+                      type="text"
+                      placeholder="Комментарий"
+                      value={
+                        comments[order.id] ??
+                        order.baristaComment ??
+                        ""
+                      }
+                      onChange={(e) =>
+                        setComments({
+                          ...comments,
+                          [order.id]: e.target.value,
+                        })
+                      }
+                      style={styles.commentInput}
+                    />
                   </td>
 
                   <td style={styles.td}>
@@ -132,6 +234,67 @@ export default function OrdersPage() {
   );
 }
 
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case "pending":
+      return {
+        backgroundColor: "#fef3c7",
+        color: "#92400e",
+      };
+
+    case "confirmed":
+      return {
+        backgroundColor: "#dbeafe",
+        color: "#1e40af",
+      };
+
+    case "paid":
+      return {
+        backgroundColor: "#ede9fe",
+        color: "#5b21b6",
+      };
+
+    case "preparing":
+      return {
+        backgroundColor: "#fde68a",
+        color: "#92400e",
+      };
+
+    case "ready":
+      return {
+        backgroundColor: "#bfdbfe",
+        color: "#1d4ed8",
+      };
+
+    case "completed":
+      return {
+        backgroundColor: "#dcfce7",
+        color: "#166534",
+      };
+
+    case "cancelled":
+      return {
+        backgroundColor: "#fee2e2",
+        color: "#991b1b",
+      };
+
+    case "rejected":
+      return {
+        backgroundColor: "#fecaca",
+        color: "#7f1d1d",
+      };
+
+    case "notPickedUp":
+      return {
+        backgroundColor: "#e5e7eb",
+        color: "#374151",
+      };
+
+    default:
+      return {};
+  }
+};
+
 const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: "32px",
@@ -183,21 +346,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
   },
 
-  pending: {
-    backgroundColor: "#fef3c7",
-    color: "#92400e",
-  },
-
-  completed: {
-    backgroundColor: "#dcfce7",
-    color: "#166534",
-  },
-
-  cancelled: {
-    backgroundColor: "#fee2e2",
-    color: "#991b1b",
-  },
-
   itemsCell: {
     backgroundColor: "#faf7f5",
     padding: "16px",
@@ -219,5 +367,26 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     padding: "6px 0",
     borderBottom: "1px dashed #ddd",
+  },
+
+  filters: {
+    marginBottom: "20px",
+  },
+
+  select: {
+    padding: "12px 14px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    fontSize: "14px",
+    minWidth: "220px",
+    backgroundColor: "white",
+  },
+
+  commentInput: {
+    width: "180px",
+    padding: "10px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    fontSize: "14px",
   },
 };

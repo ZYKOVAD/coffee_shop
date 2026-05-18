@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 
 import AdminLayout from "./layouts/AdminLayout";
+import BaristaLayout from "./layouts/BaristaLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import Dashboard from "./pages/admin/DashboardPage";
 import ProductsPage from "./pages/admin/ProductsPage";
 import CreateProductPage from "./pages/admin/CreateProductPage";
 import EditProductPage from "./pages/admin/EditProductPage";
@@ -17,6 +18,8 @@ import OrdersPage from "./pages/admin/OrdersPage";
 import BaristasPage from "./pages/admin/BaristasPage";
 import CreateBaristaPage from "./pages/admin/CreateBaristaPage";
 import EditBaristaPage from "./pages/admin/EditBaristaPage";
+
+import BaristaOrdersPage from "./pages/barista/BaristaOrdersPage";
 
 export default function AppRouter() {
   return (
@@ -32,7 +35,7 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<AdminDashboard />} />
+          <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/create" element={<CreateProductPage />} />
           <Route path="products/:id" element={<EditProductPage />} />
@@ -45,6 +48,18 @@ export default function AppRouter() {
           <Route path="baristas/create" element={<CreateBaristaPage />} />
           <Route path="baristas/:id" element={<EditBaristaPage />} />
 
+        </Route>
+
+        <Route
+          path="/barista"
+          element={
+            <ProtectedRoute allowedRoles={["barista"]}>
+              <BaristaLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="orders" element={<BaristaOrdersPage />}
+          />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />

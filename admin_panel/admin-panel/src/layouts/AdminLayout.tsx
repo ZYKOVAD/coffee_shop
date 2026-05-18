@@ -20,7 +20,7 @@ export default function AdminLayout() {
               e.currentTarget.style.backgroundColor =
                 "rgba(255,255,255,0.05)";
             }}>
-            Dashboard
+            Главная
           </Link>
 
           <Link style={styles.link} to="/admin/products"
@@ -80,7 +80,7 @@ export default function AdminLayout() {
               e.currentTarget.style.backgroundColor =
                 "rgba(255,255,255,0.05)";
             }}>
-            Бариста
+            Сотрудники
           </Link>
         </nav>
 
