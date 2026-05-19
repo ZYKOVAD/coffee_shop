@@ -129,7 +129,7 @@ public class UserService
             throw new Exception("Email already exists");
 
         // Check if phone already exists
-        if (createDto.Phone != null)
+        if (createDto.Phone != null & createDto.Phone != "")
             if (await _userRepository.PhoneExistsAsync(createDto.Phone))
                 throw new Exception("Phone already exists");
 
@@ -194,7 +194,8 @@ public class UserService
             
         if (!string.IsNullOrWhiteSpace(updateDto.Password))
             user.PasswordHash = HashPassword(updateDto.Password);
-
+        if (!string.IsNullOrWhiteSpace(updateDto.Role))
+            user.Role = updateDto.Role;
         _userRepository.Update(user);
         await _context.SaveChangesAsync();
 

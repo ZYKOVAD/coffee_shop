@@ -6,6 +6,8 @@ export interface Product {
   imgUrl: string;
   isActive: boolean;
   categoryId: number;
+  categoryName: string;
+  modifiers: Modifier[];
 }
 
 export interface CreateProductDto {
@@ -24,3 +26,10 @@ export interface UpdateProductDto {
   imgUrl?: string;
   isActive?: boolean;
 }
+
+export type Modifier = {
+  id: number;
+  name: string;
+  price: number;
+  productIds: number[]
+};

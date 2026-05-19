@@ -38,6 +38,13 @@ public class ProductService
         return products.Select(p => MapToDto(p)).ToList();
     }
 
+    // Get popular products
+    public async Task<List<ProductDto>> GetPopularProductsAsync()
+    {
+        var products = await _productRepository.GetPopularProductsAsync();
+        return products.Select(p => MapToDto(p)).ToList();
+    }
+
     // Get products by category
     public async Task<List<ProductDto>> GetProductsByCategoryAsync(int categoryId)
     {
@@ -62,6 +69,7 @@ public class ProductService
             CategoryId = createDto.CategoryId,
             ImgUrl = createDto.ImgUrl,
             IsActive = true,
+            IsPopular = false,
             Count = 0
         };
 
@@ -92,6 +100,9 @@ public class ProductService
 
         if (updateDto.IsActive.HasValue)
             product.IsActive = updateDto.IsActive.Value;
+
+        if (updateDto.IsPopular.HasValue)
+            product.IsPopular = updateDto.IsPopular.Value;
 
         if (!string.IsNullOrEmpty(updateDto.ImgUrl))
             product.ImgUrl = updateDto.ImgUrl;
@@ -128,6 +139,38 @@ public class ProductService
         }
 
         product.IsActive = false;
+        _productRepository.Update(product);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    // Set product popular
+    public async Task<bool> SetPopularAsync(int id)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null)
+        {
+            return false;
+        }
+
+        product.IsPopular = true;
+        _productRepository.Update(product);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    // Set product not popular
+    public async Task<bool> SetNotPopularAsync(int id)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null)
+        {
+            return false;
+        }
+
+        product.IsPopular = false;
         _productRepository.Update(product);
         await _context.SaveChangesAsync();
 
@@ -201,6 +244,7 @@ public class ProductService
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name,
             IsActive = product.IsActive,
+            IsPopular = product.IsPopular,
             ImgUrl = product.ImgUrl,
             Modifiers = product.Modifiers?.Select(m => new ModifierDto
             {

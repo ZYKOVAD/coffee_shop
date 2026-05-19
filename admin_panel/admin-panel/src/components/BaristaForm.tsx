@@ -12,6 +12,7 @@ interface Props {
     username: string;
     email: string;
     phone: string;
+    role?: "admin" | "barista";
   };
 
   showPassword?: boolean;
@@ -20,6 +21,7 @@ interface Props {
     username: string;
     email: string;
     phone: string;
+    role: "admin" | "barista";
     password?: string;
   }) => void | Promise<void>;
 }
@@ -42,8 +44,13 @@ export default function BaristaForm({
     initialData?.email || ""
   );
 
-  const [phone, setPhone] =
-    useState(initialData?.phone || "");
+  const [phone, setPhone] = useState(initialData?.phone || "");
+  
+  const [role, setRole] = useState<
+    "admin" | "barista"
+  >(
+    initialData?.role || "barista"
+  );
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
@@ -69,6 +76,7 @@ export default function BaristaForm({
       password: showPassword
         ? password
         : undefined,
+      role,
     });
   };
 
@@ -125,6 +133,26 @@ export default function BaristaForm({
             placeholder="Телефон"
             style={styles.input}
           />
+
+          <select
+            value={role}
+            onChange={(e) =>
+              setRole(
+                e.target.value as
+                  | "admin"
+                  | "barista"
+              )
+            }
+            style={styles.input}
+          >
+            <option value="barista">
+              Бариста
+            </option>
+
+            <option value="admin">
+              Администратор
+            </option>
+          </select>
 
           {showPassword && (
             <>

@@ -40,6 +40,15 @@ namespace CoffeeShop.API.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Product>> GetPopularProductsAsync()
+        {
+            return await _dbSet
+                .Where(p => p.IsPopular)
+                .Include(p => p.Category)
+                .Include(p => p.Modifiers)
+                .ToListAsync();
+        }
+
         public async Task<List<Product>> GetByCategoryAsync(int categoryId)
         {
             return await _dbSet

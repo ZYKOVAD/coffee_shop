@@ -23,6 +23,9 @@ namespace CoffeeShop.API.Models
         [Precision(18, 2)]
         public decimal Price { get; set; }
 
+        [Column("Is_popular")]
+        public bool IsPopular { get; set; }
+
         [Column("Img_url")]
         public string? ImgUrl { get; set; }
 

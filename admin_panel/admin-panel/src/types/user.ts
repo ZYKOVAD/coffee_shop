@@ -12,10 +12,12 @@ export interface CreateUserDto {
   email: string;
   phone: string;
   password: string;
+  role: string;
 }
 
 export interface UpdateUserDto {
   username?: string;
   email?: string;
   phone?: string;
+  role: string;
 }

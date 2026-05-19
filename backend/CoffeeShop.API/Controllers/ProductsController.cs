@@ -37,6 +37,15 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    // GET: api/products/active
+    [HttpGet("popular")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPopular()
+    {
+        var products = await _productService.GetPopularProductsAsync();
+        return Ok(products);
+    }
+
     // GET: api/products/category/id (active)
     [HttpGet("category/{categoryId}")]
     [AllowAnonymous]
@@ -89,8 +98,8 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    // PUT: api/products/activate/id
-    [HttpPut("activate/{id}")]
+    // PATCH: api/products/activate/id
+    [HttpPatch("activate/{id}")]
     [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Activate(int id)
     {
@@ -101,12 +110,36 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    // PUT: api/products/deactivate/id
-    [HttpPut("deactivate/{id}")]
+    // PATCH: api/products/deactivate/id
+    [HttpPatch("deactivate/{id}")]
     [Authorize(Roles = "admin,barista")]
     public async Task<IActionResult> Deactivate(int id)
     {
         var result = await _productService.DeactivateProductAsync(id);
+        if (!result)
+            return NotFound(new { message = $"Product with id {id} not found" });
+
+        return NoContent();
+    }
+
+    // PATCH: api/products/popular/id
+    [HttpPatch("popular/{id}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> SetPopular(int id)
+    {
+        var result = await _productService.SetPopularAsync(id);
+        if (!result)
+            return NotFound(new { message = $"Product with id {id} not found" });
+
+        return NoContent();
+    }
+
+    // PATCH: api/products/popular/id
+    [HttpPatch("unpopular/{id}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> NotPopular(int id)
+    {
+        var result = await _productService.SetNotPopularAsync(id);
         if (!result)
             return NotFound(new { message = $"Product with id {id} not found" });
 

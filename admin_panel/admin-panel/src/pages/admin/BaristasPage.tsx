@@ -81,7 +81,7 @@ export default function BaristasPage() {
                 <td style={styles.td}>{b.username}</td>
                 <td style={styles.td}>{b.email}</td>
                 <td style={styles.td}>{b.phone}</td>
-                <td style={styles.td}>{b.role}</td>
+                <td style={styles.td}>{getRoleLabel(b.role)}</td>
 
                 <td style={styles.td}>
                   <button
@@ -108,6 +108,22 @@ export default function BaristasPage() {
     </div>
   );
 }
+
+
+const getRoleLabel = (
+  role: string
+) => {
+  switch (role) {
+    case "admin":
+      return "Администратор";
+
+    case "barista":
+      return "Бариста";
+
+    default:
+      return role;
+  }
+};
 
 const styles: Record<string, React.CSSProperties> = {
   header: {

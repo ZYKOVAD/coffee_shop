@@ -278,7 +278,7 @@ export default function BaristaOrderCard({ order, onUpdated }: Props) {
           />
 
           <button
-            onClick={() => changeStatus("cancelled", comment)}
+            onClick={() => changeStatus("rejected", comment)}
             style={{ ...btn, background: "#ef4444", marginTop: 8 }}
           >
             Подтвердить отказ

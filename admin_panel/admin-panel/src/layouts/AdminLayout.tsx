@@ -32,7 +32,7 @@ export default function AdminLayout() {
               e.currentTarget.style.backgroundColor =
                 "rgba(255,255,255,0.05)";
             }}>
-            Продукты
+            Товары
           </Link>
 
           <Link style={styles.link} to="/admin/categories"

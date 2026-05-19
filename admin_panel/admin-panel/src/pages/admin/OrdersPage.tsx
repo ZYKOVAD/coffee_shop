@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { getOrders, updateOrderStatus } from "../../api/ordersApi";
-import type { Order } from "../../types/order";
 
+import {
+  getOrders,
+  updateOrderStatus,
+  type OrderStatus,
+} from "../../api/ordersApi";
+
+import type { Order, } from "../../types/order";
 
 const statuses = [
   "all",
   "pending",
   "confirmed",
-  "paid",
   "preparing",
   "ready",
   "completed",
@@ -17,13 +21,23 @@ const statuses = [
 ];
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [comments, setComments] = useState<
-    Record<number, string>
-  >({});
+  const [orders, setOrders] = useState<
+    Order[]
+  >([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [statusFilter, setStatusFilter] =
+    useState("all");
+
+  const [selectedOrder, setSelectedOrder] =
+    useState<Order | null>(null);
+
+  const [comments, setComments] =
+    useState<
+      Record<number, string>
+    >({});
 
   useEffect(() => {
     loadOrders();
@@ -32,62 +46,99 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       const data = await getOrders();
+
       setOrders(data);
     } catch (error) {
       console.error(error);
-      alert("Ошибка загрузки заказов");
+
+      alert(
+        "Ошибка загрузки заказов"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const handleStatusChange =
+    async (
+      orderId: number,
+      newStatus: string
+    ) => {
+      try {
+        await updateOrderStatus(
+          orderId,
+          {
+            status:
+              newStatus as OrderStatus,
+
+            baristaComment:
+              comments[orderId] ||
+              "",
+          }
+        );
+
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === orderId
+              ? {
+                  ...order,
+                  status: newStatus,
+                  baristaComment:
+                    comments[
+                      orderId
+                    ] || "",
+                }
+              : order
+          )
+        );
+
+        if (
+          selectedOrder &&
+          selectedOrder.id === orderId
+        ) {
+          setSelectedOrder({
+            ...selectedOrder,
+            status: newStatus,
+            baristaComment:
+              comments[orderId] ||
+              "",
+          });
+        }
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "Ошибка изменения статуса"
+        );
+      }
+    };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const filteredOrders =
     statusFilter === "all"
       ? orders
       : orders.filter(
-          (x) => x.status === statusFilter
+          (x) =>
+            x.status ===
+            statusFilter
         );
-
-  const handleStatusChange = async (
-    orderId: number,
-    newStatus: string
-  ) => {
-    try {
-      await updateOrderStatus(
-        orderId,
-        newStatus,
-        comments[orderId] || ""
-      );
-
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId
-            ? {
-                ...order,
-                status: newStatus,
-                baristaComment:
-                  comments[orderId] || "",
-              }
-            : order
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      alert("Ошибка изменения статуса");
-    }
-  };
 
   return (
     <div>
-      <h1 style={styles.title}>Заказы</h1>
+      <h1 style={styles.title}>
+        Заказы
+      </h1>
 
       <div style={styles.filters}>
         <select
           value={statusFilter}
           onChange={(e) =>
-            setStatusFilter(e.target.value)
+            setStatusFilter(
+              e.target.value
+            )
           }
           style={styles.select}
         >
@@ -98,7 +149,7 @@ export default function OrdersPage() {
             >
               {status === "all"
                 ? "Все статусы"
-                : status}
+                : getStatusLabel(status)}
             </option>
           ))}
         </select>
@@ -108,23 +159,45 @@ export default function OrdersPage() {
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>№</th>
-              <th style={styles.th}>Пользователь</th>
-              <th style={styles.th}>Email</th>
-              <th style={styles.th}>Сумма</th>
-              <th style={styles.th}>Статус</th>
-              <th style={styles.th}>Комментарий</th>
-              <th style={styles.th}>Дата</th>
-              <th style={styles.th}>Детали</th>
+              <th style={styles.th}>
+                №
+              </th>
+
+              <th style={styles.th}>
+                Пользователь
+              </th>
+
+              <th style={styles.th}>
+                Email
+              </th>
+
+              <th style={styles.th}>
+                Сумма
+              </th>
+
+              <th style={styles.th}>
+                Статус
+              </th>
+
+              <th style={styles.th}>
+                Дата
+              </th>
+
+              <th style={styles.th}>
+                Детали
+              </th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredOrders.map((order) => (
-              <>
+            {filteredOrders.map(
+              (order) => (
                 <tr key={order.id}>
                   <td style={styles.td}>
-                    #{order.orderNumber}
+                    #
+                    {
+                      order.orderNumber
+                    }
                   </td>
 
                   <td style={styles.td}>
@@ -136,166 +209,398 @@ export default function OrdersPage() {
                   </td>
 
                   <td style={styles.td}>
-                    {order.totalPrice} ₽
+                    {
+                      order.totalPrice
+                    }{" "}
+                    ₽
                   </td>
 
                   <td style={styles.td}>
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          order.id,
-                          e.target.value
-                        )
-                      }
+                    <span
                       style={{
                         ...styles.status,
                         ...getStatusStyle(order.status),
                       }}
                     >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
+                      {
+                        getStatusLabel(order.status)
+                      }
+                    </span>
                   </td>
 
                   <td style={styles.td}>
-                    <input
-                      type="text"
-                      placeholder="Комментарий"
-                      value={
-                        comments[order.id] ??
-                        order.baristaComment ??
-                        ""
-                      }
-                      onChange={(e) =>
-                        setComments({
-                          ...comments,
-                          [order.id]: e.target.value,
-                        })
-                      }
-                      style={styles.commentInput}
-                    />
-                  </td>
-
-                  <td style={styles.td}>
-                    {new Date(order.createdAt).toLocaleString()}
+                    {new Date(
+                      order.createdAt
+                    ).toLocaleString()}
                   </td>
 
                   <td style={styles.td}>
                     <button
-                      style={styles.button}
+                      style={
+                        styles.button
+                      }
                       onClick={() =>
-                        setExpandedOrderId(
-                          expandedOrderId === order.id
-                            ? null
-                            : order.id
+                        setSelectedOrder(
+                          order
                         )
                       }
                     >
-                      {expandedOrderId === order.id
-                        ? "Скрыть"
-                        : "Показать"}
+                      Подробнее
                     </button>
                   </td>
                 </tr>
-
-                {expandedOrderId === order.id && (
-                  <tr>
-                    <td colSpan={6} style={styles.itemsCell}>
-                      <div style={styles.itemsBox}>
-                        <h4 style={styles.itemsTitle}>
-                          Состав заказа
-                        </h4>
-
-                        {order.items.map((item) => (
-                          <div key={item.id} style={styles.itemRow}>
-                            <span>
-                              {item.productName} × {item.count}
-                            </span>
-
-                            <span>
-                              {item.totalPrice} ₽
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
+              )
+            )}
           </tbody>
         </table>
       </div>
+
+      {selectedOrder && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div
+              style={
+                styles.modalHeader
+              }
+            >
+              <h2
+                style={
+                  styles.modalTitle
+                }
+              >
+                Заказ #
+                {
+                  selectedOrder.orderNumber
+                }
+              </h2>
+
+              <button
+                style={
+                  styles.closeButton
+                }
+                onClick={() =>
+                  setSelectedOrder(
+                    null
+                  )
+                }
+              >
+                ✕
+              </button>
+            </div>
+
+            <div
+              style={
+                styles.infoGrid
+              }
+            >
+              <div>
+                <b>
+                  Пользователь:
+                </b>{" "}
+                {
+                  selectedOrder.userName
+                }
+              </div>
+
+              <div>
+                <b>Email:</b>{" "}
+                {
+                  selectedOrder.email
+                }
+              </div>
+
+              <div>
+                <b>Статус:</b>{" "}
+                {
+                  getStatusLabel(selectedOrder.status)
+                }
+              </div>
+
+              <div>
+                <b>Сумма:</b>{" "}
+                {
+                  selectedOrder.totalPrice
+                }{" "}
+                ₽
+              </div>
+
+              <div>
+                <b>
+                  Использовано
+                  бонусов:
+                </b>{" "}
+                {
+                  selectedOrder.bonusUsed
+                }
+              </div>
+
+              <div>
+                <b>
+                  Начислено
+                  бонусов:
+                </b>{" "}
+                {
+                  selectedOrder.bonusEarned
+                }
+              </div>
+
+              <div>
+                <b>
+                  Время
+                  получения:
+                </b>{" "}
+                {new Date(
+                  selectedOrder.pickupTime
+                ).toLocaleString()}
+              </div>
+
+              <div>
+                <b>Создан:</b>{" "}
+                {new Date(
+                  selectedOrder.createdAt
+                ).toLocaleString()}
+              </div>
+            </div>
+
+            <div style={styles.section}>
+              <h3
+                style={
+                  styles.sectionTitle
+                }
+              >
+                Комментарий
+                клиента
+              </h3>
+
+              <div
+                style={
+                  styles.commentBox
+                }
+              >
+                {selectedOrder.clientComment ||
+                  "Нет комментария"}
+              </div>
+            </div>
+
+            <div style={styles.section}>
+              <h3
+                style={
+                  styles.sectionTitle
+                }
+              >
+                Состав заказа
+              </h3>
+
+              <div
+                style={
+                  styles.itemsList
+                }
+              >
+                {selectedOrder.items.map(
+                  (item) => (
+                    <div key={item.id} style={styles.itemRow}>
+                      <div>
+                        <div>
+                          {item.productName} × {item.count}
+                        </div>
+
+                        {parseModifiers(item.selectedModifiers).length > 0 && (
+                          <div style={styles.modifiers}>
+                            {parseModifiers(item.selectedModifiers)
+                              .map((m: any) =>
+                                m.price > 0 ? `${m.name} (+${m.price} ₽)` : m.name
+                              )
+                              .join(", ")}
+                          </div>
+                        )}
+                      </div>
+                        
+                      <div>{item.totalPrice} ₽</div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            <div style={styles.section}>
+              <h3
+                style={
+                  styles.sectionTitle
+                }
+              >
+                Управление
+                заказом
+              </h3>
+
+              <select
+                value={selectedOrder.status}
+                onChange={(e) =>
+                  setSelectedOrder({
+                    ...selectedOrder,
+                    status: e.target.value,
+                  })
+                }
+                style={{
+                ...styles.modalSelect,
+                ...getStatusStyle(
+                  selectedOrder.status
+                ),
+              }}
+              >
+                {statuses
+                  .filter((s) => s !== "all")
+                  .map((status) => (
+                    <option
+                      key={status}
+                      value={status}
+                    >
+                      {getStatusLabel(status)}
+                    </option>
+                  ))}
+              </select>
+
+              <textarea
+                placeholder="Комментарий бариста"
+                value={
+                  comments[
+                    selectedOrder.id
+                  ] ??
+                  selectedOrder.baristaComment ??
+                  ""
+                }
+                onChange={(e) =>
+                  setComments({
+                    ...comments,
+                    [
+                      selectedOrder.id
+                    ]:
+                      e.target
+                        .value,
+                  })
+                }
+                style={
+                  styles.textarea
+                }
+              />
+
+              <button
+                style={
+                  styles.saveButton
+                }
+                onClick={async () => {
+                  await handleStatusChange(
+                    selectedOrder.id,
+                    selectedOrder.status
+                  );
+
+                  setSelectedOrder(
+                    null
+                  );
+                }}
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-const getStatusStyle = (status: string) => {
-  switch (status) {
-    case "pending":
-      return {
-        backgroundColor: "#fef3c7",
-        color: "#92400e",
-      };
-
-    case "confirmed":
-      return {
-        backgroundColor: "#dbeafe",
-        color: "#1e40af",
-      };
-
-    case "paid":
-      return {
-        backgroundColor: "#ede9fe",
-        color: "#5b21b6",
-      };
-
-    case "preparing":
-      return {
-        backgroundColor: "#fde68a",
-        color: "#92400e",
-      };
-
-    case "ready":
-      return {
-        backgroundColor: "#bfdbfe",
-        color: "#1d4ed8",
-      };
-
-    case "completed":
-      return {
-        backgroundColor: "#dcfce7",
-        color: "#166534",
-      };
-
-    case "cancelled":
-      return {
-        backgroundColor: "#fee2e2",
-        color: "#991b1b",
-      };
-
-    case "rejected":
-      return {
-        backgroundColor: "#fecaca",
-        color: "#7f1d1d",
-      };
-
-    case "notPickedUp":
-      return {
-        backgroundColor: "#e5e7eb",
-        color: "#374151",
-      };
-
-    default:
-      return {};
+const statusConfig: Record<
+  string,
+  {
+    label: string;
+    style: React.CSSProperties;
   }
+> = {
+  pending: {
+    label: "Ожидает подтверждения",
+    style: {
+      backgroundColor: "#fef3c7",
+      color: "#92400e",
+    },
+  },
+
+  confirmed: {
+    label: "Подтверждён",
+    style: {
+      backgroundColor: "#dbeafe",
+      color: "#1e40af",
+    },
+  },
+
+  preparing: {
+    label: "Готовится",
+    style: {
+      backgroundColor: "#fde68a",
+      color: "#92400e",
+    },
+  },
+
+  ready: {
+    label: "Готов",
+    style: {
+      backgroundColor: "#bfdbfe",
+      color: "#1d4ed8",
+    },
+  },
+
+  completed: {
+    label: "Завершён",
+    style: {
+      backgroundColor: "#dcfce7",
+      color: "#166534",
+    },
+  },
+
+  cancelled: {
+    label: "Отменён",
+    style: {
+      backgroundColor: "#fee2e2",
+      color: "#991b1b",
+    },
+  },
+
+  rejected: {
+    label: "Отклонён",
+    style: {
+      backgroundColor: "#fecaca",
+      color: "#7f1d1d",
+    },
+  },
+
+  notPickedUp: {
+    label: "Не забрали",
+    style: {
+      backgroundColor: "#e5e7eb",
+      color: "#374151",
+    },
+  },
 };
 
-const styles: Record<string, React.CSSProperties> = {
+const getStatusLabel = (
+  status: string
+) => {
+  return (
+    statusConfig[status]?.label ||
+    status
+  );
+};
+
+const getStatusStyle = (
+  status: string
+) => {
+  return (
+    statusConfig[status]?.style || {}
+  );
+};
+
+const styles: Record<
+  string,
+  React.CSSProperties
+> = {
   title: {
     fontSize: "32px",
     color: "#442D25",
@@ -303,11 +608,25 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: "24px",
   },
 
+  filters: {
+    marginBottom: "20px",
+  },
+
+  select: {
+    padding: "12px 14px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    fontSize: "14px",
+    minWidth: "220px",
+    backgroundColor: "white",
+  },
+
   tableWrapper: {
     backgroundColor: "white",
     borderRadius: "16px",
     overflow: "hidden",
-    boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+    boxShadow:
+      "0 4px 16px rgba(0,0,0,0.06)",
   },
 
   table: {
@@ -325,8 +644,9 @@ const styles: Record<string, React.CSSProperties> = {
 
   td: {
     padding: "16px",
-    borderBottom: "1px solid #eee",
-    verticalAlign: "top",
+    borderBottom:
+      "1px solid #eee",
+    verticalAlign: "middle",
   },
 
   button: {
@@ -340,53 +660,143 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   status: {
-    padding: "4px 10px",
+    padding: "8px 14px",
     borderRadius: "999px",
-    fontSize: "12px",
-    fontWeight: 600,
+    fontSize: "13px",
+    fontWeight: 700,
   },
 
-  itemsCell: {
-    backgroundColor: "#faf7f5",
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background:
+      "rgba(0,0,0,0.45)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+
+  modal: {
+    width: "900px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    background: "white",
+    borderRadius: "24px",
+    padding: "28px",
+    boxShadow:
+      "0 10px 40px rgba(0,0,0,0.18)",
+  },
+
+  modalHeader: {
+    display: "flex",
+    justifyContent:
+      "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+  },
+
+  modalTitle: {
+    fontSize: "28px",
+    fontWeight: 700,
+    color: "#442D25",
+  },
+
+  closeButton: {
+    border: "none",
+    background: "transparent",
+    fontSize: "28px",
+    cursor: "pointer",
+  },
+
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(2, 1fr)",
+    gap: "14px",
+    marginBottom: "28px",
+  },
+
+  section: {
+    marginBottom: "28px",
+  },
+
+  sectionTitle: {
+    fontSize: "20px",
+    fontWeight: 700,
+    color: "#442D25",
+    marginBottom: "14px",
+  },
+
+  commentBox: {
     padding: "16px",
+    background: "#f8f5f3",
+    borderRadius: "14px",
   },
 
-  itemsBox: {
+  itemsList: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
-  },
-
-  itemsTitle: {
-    marginBottom: "8px",
-    color: "#442D25",
+    gap: "10px",
   },
 
   itemRow: {
     display: "flex",
-    justifyContent: "space-between",
-    padding: "6px 0",
-    borderBottom: "1px dashed #ddd",
+    justifyContent:
+      "space-between",
+    padding: "12px 0",
+    borderBottom:
+      "1px dashed #ddd",
   },
 
-  filters: {
-    marginBottom: "20px",
+  modalSelect: {
+    padding: "12px",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: 700,
+    marginBottom: "16px",
   },
 
-  select: {
-    padding: "12px 14px",
-    borderRadius: "10px",
+  textarea: {
+    width: "100%",
+    minHeight: "120px",
+    padding: "14px",
+    borderRadius: "14px",
     border: "1px solid #ddd",
+    resize: "vertical",
+    marginBottom: "18px",
     fontSize: "14px",
-    minWidth: "220px",
-    backgroundColor: "white",
+    boxSizing: "border-box",
   },
 
-  commentInput: {
-    width: "180px",
-    padding: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ddd",
-    fontSize: "14px",
+  saveButton: {
+    padding: "14px 20px",
+    borderRadius: "12px",
+    border: "none",
+    backgroundColor: "#442D25",
+    color: "white",
+    fontWeight: 700,
+    cursor: "pointer",
   },
+
+  modifiers: {
+  fontSize: "12px",
+  color: "#777",
+  marginTop: "4px",
+},
+};
+
+const parseModifiers = (mods: any) => {
+  if (!mods) return [];
+
+  try {
+    const parsed =
+      typeof mods === "string"
+        ? JSON.parse(mods)
+        : mods;
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 };

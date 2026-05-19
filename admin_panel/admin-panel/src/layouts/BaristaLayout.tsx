@@ -18,6 +18,13 @@ export default function BaristaLayout() {
           >
             Заказы
           </Link>
+
+          <Link
+            to="/barista/products"
+            style={styles.link}
+          >
+            Товары
+          </Link>
         </nav>
 
         <div style={styles.bottom}>

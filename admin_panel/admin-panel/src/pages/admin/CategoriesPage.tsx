@@ -3,27 +3,33 @@ import {
   useState,
 } from "react";
 
-import { useNavigate } from "react-router-dom";
-
 import {
   getCategories,
   deleteCategory,
+  createCategory,
+  updateCategory,
 } from "../../api/categoriesApi";
 
 import type { Category } from "../../types/category";
+import CategoryForm from "../../components/CategoryForm";
 
 export default function CategoriesPage() {
-  const navigate = useNavigate();
 
-  const [categories, setCategories] =
-    useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCategories();
   }, []);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const loadCategories = async () => {
     try {
@@ -60,6 +66,69 @@ export default function CategoriesPage() {
     }
   };
 
+  const openCreateModal = () => {
+    setEditingCategory(null);
+
+    setModalMode("create");
+
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (category: Category) => {
+    setEditingCategory(category);
+
+    setModalMode("edit");
+
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = async (data: any) => {
+    try {
+      setLoadingSubmit(true);
+
+      await createCategory({
+        name: data.name,
+      });
+
+      await loadCategories();
+
+      setIsModalOpen(false);
+
+      alert("Категория создана");
+    } catch (e) {
+      console.error(e);
+
+      alert("Ошибка создания");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handleUpdate = async (data: any) => {
+    if (!editingCategory) return;
+
+    try {
+      setLoadingSubmit(true);
+
+      await updateCategory(editingCategory.id, {
+        name: data.name,
+        isActive: data.isActive,
+      });
+
+      await loadCategories();
+
+      setIsModalOpen(false);
+
+      alert("Категория обновлена");
+    } catch (e) {
+      console.error(e);
+
+      alert("Ошибка сохранения");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -73,11 +142,7 @@ export default function CategoriesPage() {
 
         <button
           style={styles.createBtn}
-          onClick={() =>
-            navigate(
-              "/admin/categories/create"
-            )
-          }
+          onClick={openCreateModal}
         >
           Добавить категорию
         </button>
@@ -124,11 +189,7 @@ export default function CategoriesPage() {
                   <div style={styles.actions}>
                     <button
                       style={styles.editBtn}
-                      onClick={() =>
-                        navigate(
-                          `/admin/categories/${category.id}`
-                        )
-                      }
+                      onClick={() => openEditModal(category)}
                     >
                       Изменить
                     </button>
@@ -150,6 +211,68 @@ export default function CategoriesPage() {
           </tbody>
         </table>
       </div>
+
+      {isModalOpen && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>
+                {modalMode === "create"
+                  ? "Добавление категории"
+                  : "Редактирование категории"}
+              </h2>
+
+              <button
+                style={styles.closeBtn}
+                onClick={() => setIsModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={styles.modalContent}>
+              <CategoryForm
+                submitText=""
+                loading={loadingSubmit}
+                initialData={editingCategory || undefined}
+                showIsActive={modalMode === "edit"}
+                onSubmit={
+                  modalMode === "create"
+                    ? handleCreate
+                    : handleUpdate
+                }
+              />
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setIsModalOpen(false)}
+              >
+                Отмена
+              </button>
+
+              <button
+                style={styles.saveBtn}
+                onClick={() => {
+                  const form =
+                    document.getElementById(
+                      "category-form"
+                    ) as HTMLFormElement;
+
+                  form?.requestSubmit();
+                }}
+                disabled={loadingSubmit}
+              >
+                {loadingSubmit
+                  ? "Сохранение..."
+                  : "Сохранить"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -223,5 +346,79 @@ const styles: Record<
     backgroundColor: "#c0392b",
     color: "white",
     cursor: "pointer",
+  },
+
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+
+  modal: {
+    width: "500px",
+    maxHeight: "80vh",
+    overflow: "hidden",
+    backgroundColor: "white",
+    borderRadius: "20px",
+    display: "flex",
+    flexDirection: "column",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+  },
+
+  modalHeader: {
+    padding: "20px 24px",
+    borderBottom: "1px solid #eee",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  modalTitle: {
+    margin: 0,
+    color: "#442D25",
+  },
+
+  modalContent: {
+    padding: "20px 24px",
+    overflowY: "auto",
+  },
+
+  closeBtn: {
+    border: "none",
+    background: "transparent",
+    fontSize: "22px",
+    cursor: "pointer",
+    color: "#666",
+  },
+
+  modalFooter: {
+    padding: "20px 24px",
+    borderTop: "1px solid #eee",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+  },
+
+  cancelBtn: {
+    padding: "12px 18px",
+    border: "none",
+    borderRadius: "10px",
+    backgroundColor: "#ece7e4",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
+
+  saveBtn: {
+    padding: "12px 18px",
+    border: "none",
+    borderRadius: "10px",
+    backgroundColor: "#442D25",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: 700,
   },
 };

@@ -80,14 +80,6 @@ public class OrdersController : ControllerBase
         return Ok(orders);
     }
 
-    //[HttpGet("barista/pending")]
-    //[Authorize(Roles = "admin,barista")]
-    //public async Task<IActionResult> GetPendingForBarista()
-    //{
-    //    var orders = await _orderService.GetPendingOrdersForBaristaAsync();
-    //    return Ok(orders);
-    //}
-
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOrderDto createDto)
     {

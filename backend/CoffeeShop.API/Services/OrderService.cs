@@ -13,9 +13,7 @@ public class OrderService
     private readonly OrderItemRepository _orderItemRepository;
     private readonly CartItemRepository _cartItemRepository;
     private readonly UserRepository _userRepository;
-    private readonly ProductRepository _productRepository;
     private readonly BonusTransactionService _bonusTransactionService;
-    private readonly NotificationService _notificationService;
     private readonly AppDbContext _context;
 
     private const decimal BONUS_PERCENT = 0.05m; // 5% bonus accrual
@@ -25,18 +23,14 @@ public class OrderService
         OrderItemRepository orderItemRepository,
         CartItemRepository cartItemRepository,
         UserRepository userRepository,
-        ProductRepository productRepository,
         BonusTransactionService bonusTransactionService,
-        NotificationService notificationService,
         AppDbContext context)
     {
         _orderRepository = orderRepository;
         _orderItemRepository = orderItemRepository;
         _cartItemRepository = cartItemRepository;
         _userRepository = userRepository;
-        _productRepository = productRepository;
         _bonusTransactionService = bonusTransactionService;
-        _notificationService = notificationService;
         _context = context;
     }
 
@@ -171,12 +165,12 @@ public class OrderService
         await _cartItemRepository.ClearUserCartAsync(userId);
         await _context.SaveChangesAsync();
 
-        // Create notification
-        await _notificationService.CreateOrderStatusNotificationAsync(
-            userId,
-            order.Id,
-            "pending",
-            "Ваш заказ создан и ожидает подтверждения бариста");
+        //// Create notification
+        //await _notificationService.CreateOrderStatusNotificationAsync(
+        //    userId,
+        //    order.Id,
+        //    "pending",
+        //    "Ваш заказ создан и ожидает подтверждения бариста");
 
         return MapToDto(order);
     }
@@ -219,44 +213,6 @@ public class OrderService
 
         return MapToDto(order);
     }
-
-    //public async Task<OrderDto?> MarkAsPaidAsync(int orderId)
-    //{
-    //    var order = await _orderRepository.GetByIdAsync(orderId);
-    //    if (order == null)
-    //        return null;
-
-    //    if (order.Status != "confirmed")
-    //        throw new Exception($"Order cannot be paid from status '{order.Status}'");
-
-    //    order.Status = "paid";
-
-    //    _orderRepository.Update(order);
-    //    await _context.SaveChangesAsync();
-
-    //    await _notificationService.CreateOrderStatusNotificationAsync(
-    //        order.UserId,
-    //        order.Id,
-    //        "paid",
-    //        "Заказ оплачен. Бариста приступит к приготовлению.");
-
-    //    return MapToDto(order);
-    //}
-
-    private string GetStatusMessage(string status)
-    {
-        return status switch
-        {
-            "confirmed" => "Заказ подтвержден",
-            "paid" => "Заказ оплачен",
-            "preparing" => "Заказ готовится",
-            "ready" => "Заказ готов к выдаче",
-            "completed" => "Заказ выполнен. Спасибо за покупку!",
-            "cancelled" => "Заказ отменен",
-            _ => $"Статус заказа изменен на {status}"
-        };
-    }
-
 
     private OrderDto MapToDto(Order order)
     {

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-
 import { getCategories } from "../api/categoriesApi";
 
 import type { Category } from "../types/category";
@@ -35,14 +33,10 @@ interface Props {
 }
 
 export default function ProductForm({
-  title,
   initialData,
-  loading,
-  submitText,
   onSubmit,
   showIsActive = false,
 }: Props) {
-  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [name, setName] = useState(
@@ -97,25 +91,8 @@ export default function ProductForm({
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>
-            {title}
-          </h1>
-
-          <button
-            type="button"
-            style={styles.closeButton}
-            onClick={() =>
-              navigate("/admin/products")
-            }
-          >
-            ×
-          </button>
-        </div>
-
         <form
+          id="product-form"
           onSubmit={handleSubmit}
           style={styles.form}
         >
@@ -204,31 +181,12 @@ export default function ProductForm({
               <label>Активен</label>
             </div>
           )}
-
-          <button
-            type="submit"
-            style={styles.button}
-            disabled={loading}
-          >
-            {loading
-              ? "Сохранение..."
-              : submitText}
-          </button>
         </form>
-      </div>
-    </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> =
   {
-    container: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "flex-start",
-      width: "100%",
-    },
-
     card: {
       width: "100%",
       maxWidth: "700px",

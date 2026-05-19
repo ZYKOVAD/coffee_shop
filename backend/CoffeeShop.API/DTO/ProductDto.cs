@@ -9,6 +9,7 @@
         public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public bool IsActive { get; set; }
+        public bool IsPopular { get; set; }
         public string? ImgUrl { get; set; }
         public List<ModifierDto> Modifiers { get; set; } = new();
     }
@@ -28,6 +29,7 @@
         public string? Description { get; set; }
         public decimal? Price { get; set; }
         public bool? IsActive { get; set; }
+        public bool? IsPopular { get; set; }
         public string? ImgUrl { get; set; }
     }
 }

@@ -14,8 +14,26 @@ export const getUserById = async (id: number) => {
   return response.data;
 };
 
-export const createBarista = async (data: CreateUserDto) => {
-  const response = await api.post("/Admin/barista", data);
+export const createBarista = async (
+  data: CreateUserDto
+) => {
+  const endpoint =
+    data.role === "admin"
+      ? "/Admin/admin"
+      : "/Admin/barista";
+
+  const payload = {
+    username: data.username,
+    phone: data.phone,
+    email: data.email,
+    password: data.password,
+  };
+
+  const response = await api.post(
+    endpoint,
+    payload
+  );
+
   return response.data;
 };
 

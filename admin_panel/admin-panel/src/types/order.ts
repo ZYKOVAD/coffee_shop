@@ -4,6 +4,7 @@ export interface OrderItem {
   count: number;
   price: number;
   totalPrice: number;
+  selectedModifiers?: string;
 }
 
 export interface Order {

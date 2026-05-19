@@ -8,11 +8,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 import Dashboard from "./pages/admin/DashboardPage";
 import ProductsPage from "./pages/admin/ProductsPage";
-import CreateProductPage from "./pages/admin/CreateProductPage";
-import EditProductPage from "./pages/admin/EditProductPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
-import CreateCategoryPage from "./pages/admin/CreateCategoryPage";
-import EditCategoryPage from "./pages/admin/EditCategoryPage";
 import UsersPage from "./pages/admin/UsersPage";
 import OrdersPage from "./pages/admin/OrdersPage";
 import BaristasPage from "./pages/admin/BaristasPage";
@@ -20,6 +16,7 @@ import CreateBaristaPage from "./pages/admin/CreateBaristaPage";
 import EditBaristaPage from "./pages/admin/EditBaristaPage";
 
 import BaristaOrdersPage from "./pages/barista/BaristaOrdersPage";
+import BaristaProductsPage from "./pages/barista/BaristaProductsPage";
 
 export default function AppRouter() {
   return (
@@ -37,11 +34,7 @@ export default function AppRouter() {
         >
           <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
-          <Route path="products/create" element={<CreateProductPage />} />
-          <Route path="products/:id" element={<EditProductPage />} />
           <Route path="categories" element={<CategoriesPage />} />
-          <Route path="categories/create" element={<CreateCategoryPage />} />
-          <Route path="categories/:id" element={<EditCategoryPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="baristas" element={<BaristasPage />} />
@@ -58,8 +51,8 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         >
-          <Route path="orders" element={<BaristaOrdersPage />}
-          />
+          <Route path="orders" element={<BaristaOrdersPage />}/>
+          <Route path="products" element={<BaristaProductsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />

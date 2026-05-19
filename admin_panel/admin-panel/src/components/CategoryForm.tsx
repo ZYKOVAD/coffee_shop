@@ -1,10 +1,6 @@
 import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-
 interface Props {
-  title: string;
-
   submitText: string;
 
   loading?: boolean;
@@ -23,16 +19,10 @@ interface Props {
 }
 
 export default function CategoryForm({
-  title,
-  submitText,
-  loading,
   initialData,
   showIsActive = false,
   onSubmit,
 }: Props) {
-
-  const navigate = useNavigate();
-
   const [name, setName] = useState(
     initialData?.name || ""
   );
@@ -53,149 +43,76 @@ export default function CategoryForm({
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>
-            {title}
-          </h1>
+    <form
+      id="category-form"
+      onSubmit={handleSubmit}
+      style={styles.form}
+    >
+      <div style={styles.field}>
+        <label>Название</label>
 
-          <button
-            type="button"
-            style={styles.closeButton}
-            onClick={() =>
-              navigate("/admin/categories")
-            }
-          >
-            ×
-          </button>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          style={styles.form}
-        >
-          <div style={styles.field}>
-            <label>Название</label>
-
-            <input
-              style={styles.input}
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              required
-            />
-          </div>
-
-          {showIsActive && (
-            <div style={styles.checkboxField}>
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) =>
-                  setIsActive(e.target.checked)
-                }
-              />
-
-              <label>Активна</label>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            style={styles.button}
-            disabled={loading}
-          >
-            {loading
-              ? "Сохранение..."
-              : submitText}
-          </button>
-        </form>
+        <input
+          style={styles.input}
+          value={name}
+          onChange={(e) =>
+            setName(e.target.value)
+          }
+          required
+        />
       </div>
-    </div>
+
+      {showIsActive && (
+        <div style={styles.checkboxField}>
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(e) =>
+              setIsActive(e.target.checked)
+            }
+          />
+
+          <label>Активна</label>
+        </div>
+      )}
+    </form>
   );
 }
 
-const styles: Record<string, React.CSSProperties> =
-  {
-    container: {
-      display: "flex",
-      justifyContent: "center",
-      width: "100%",
-    },
+const styles: Record<string, React.CSSProperties> = {
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
 
-    card: {
-      width: "100%",
-      maxWidth: "700px",
-      backgroundColor: "white",
-      padding: "32px",
-      borderRadius: "18px",
-      boxShadow:
-        "0 4px 16px rgba(0,0,0,0.08)",
-    },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
 
-    title: {
-      color: "#442D25",
-      fontSize: "32px",
-      fontWeight: 700,
-    },
+  input: {
+    padding: "14px",
+    borderRadius: "10px",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+  },
 
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-    },
+  checkboxField: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
 
-    field: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-    },
-
-    input: {
-      padding: "14px",
-      borderRadius: "10px",
-      border: "1px solid #ccc",
-      fontSize: "16px",
-    },
-
-    checkboxField: {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-    },
-
-    button: {
-      width: "100%",
-      padding: "16px",
-      border: "none",
-      borderRadius: "12px",
-      backgroundColor: "#442D25",
-      color: "white",
-      fontSize: "16px",
-      fontWeight: 600,
-      cursor: "pointer",
-    },
-
-    header: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "24px",
-    },
-
-    closeButton: {
-      width: "40px",
-      height: "40px",
-      borderRadius: "50%",
-      border: "none",
-      backgroundColor: "#f3f3f3",
-      color: "#442D25",
-      fontSize: "26px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-  };
+  button: {
+    width: "100%",
+    padding: "16px",
+    border: "none",
+    borderRadius: "12px",
+    backgroundColor: "#442D25",
+    color: "white",
+    fontSize: "16px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+};
