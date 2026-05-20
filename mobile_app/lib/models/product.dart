@@ -1,3 +1,5 @@
+import '../services/img_service.dart';
+
 class Product {
   final int id;
   final String name;
@@ -28,4 +30,6 @@ class Product {
       isActive: json['isActive'] ?? json['is_active'] ?? true,
     );
   }
+
+  String get image => ImageUrlService.resolve(imgUrl);
 }

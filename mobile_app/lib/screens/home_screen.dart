@@ -1,11 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:coffee_app/services/order_service.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Banner;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 
 import '../models/order.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
+import '../models/banner.dart';
 import '../services/coffee_status_service.dart';
 import '../services/order_status_extension.dart';
 import '../widgets/product_card.dart';
@@ -31,32 +33,28 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Order> _activeOrders = [];
   bool _loadingOrders = true;
 
-  final List<BannerItem> _banners = [
-    BannerItem(
-      title: 'Новинка!',
-      subtitle: 'Лавандовый раф уже в меню',
-      color: const Color(0xFF9C27B0),
-      icon: Icons.local_cafe,
-    ),
-    BannerItem(
-      title: 'Скидка 20%',
-      subtitle: 'На капучино каждый понедельник',
-      color: const Color(0xFFFF9800),
-      icon: Icons.local_offer,
-    ),
-    BannerItem(
-      title: 'Бонусы',
-      subtitle: 'Получай +5% за каждый заказ',
-      color: const Color(0xFF4CAF50),
-      icon: Icons.card_giftcard,
-    ),
-  ];
+  List<Banner> _banners = [];
+  bool _loadingBanners = true;
 
   @override
   void initState() {
     super.initState();
     _loadPopularProducts();
     _loadActiveOrders();
+    _loadBanners();
+  }
+
+  Future<void> _loadBanners() async {
+    try {
+      final data = await _apiService.getBanners();
+      setState(() {
+        _banners = data;
+        _currentBannerIndex = 0;
+        _loadingBanners = false;
+      });
+    } catch (_) {
+      setState(() => _loadingBanners = false);
+    }
   }
 
   Future<void> _loadPopularProducts() async {
@@ -66,9 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final all = await _apiService.getActiveProducts();
+      final products = await _apiService.getPopularProducts();
       setState(() {
-        _popularProducts = all.take(6).toList();
+        _popularProducts = products;
         _isLoading = false;
       });
     } catch (e) {
@@ -92,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,7 +107,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       body: RefreshIndicator(
-        onRefresh: _loadPopularProducts,
+        onRefresh: () async {
+          await Future.wait([
+            _loadPopularProducts(),
+            _loadActiveOrders(),
+            _loadBanners(),
+          ]);
+        },
         child: CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -161,14 +166,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBanner() {
+    if (_loadingBanners) {
+      return const SizedBox(
+        height: 160,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_banners.isEmpty) {
+      return const SizedBox(height: 160);
+    }
+
     return Column(
       children: [
         CarouselSlider(
+          key: ValueKey(_banners.length),
           options: CarouselOptions(
             height: 160,
             autoPlay: true,
             enlargeCenterPage: true,
-            viewportFraction: 0.85,
+            viewportFraction: 0.9,
             onPageChanged: (i, _) => setState(() => _currentBannerIndex = i),
           ),
           items: _banners.map((b) => _bannerCard(b)).toList(),
@@ -211,44 +228,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _bannerCard(BannerItem b) {
+  Widget _bannerCard(Banner b) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: b.color,
+      width: double.infinity,
+      height: double.infinity,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(b.icon, color: Colors.white, size: 40),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    b.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    b.subtitle,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+        child: CachedNetworkImage(
+          imageUrl: b.image,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+
+          placeholder: (_, __) =>
+              Container(color: Colors.grey.shade200),
+
+          errorWidget: (_, __, ___) =>
+              Container(
+                color: Colors.grey.shade300,
+                child: const Icon(Icons.image_not_supported),
               ),
-            )
-          ],
         ),
       ),
     );

@@ -40,7 +40,7 @@ class ProductCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(14),
               ),
-              child: _buildPlaceholder(),
+              child: _buildImage(),
             ),
 
             // CONTENT
@@ -168,24 +168,34 @@ class ProductCard extends StatelessWidget {
     }
   }
 
+  Widget _buildImage() {
+    final url = product.image;
+
+    if (url.isEmpty) {
+      return _buildPlaceholder();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: url,
+      height: 130,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      placeholder: (_, __) =>
+          Container(color: Colors.grey.shade200),
+      errorWidget: (_, __, ___) => _buildPlaceholder(),
+    );
+  }
+
   Widget _buildPlaceholder() {
-    return Image.asset(
-        'assets/images/cup.jpg',
-        height: 130,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            height: 130,
-            width: double.infinity,
-            color: AppColors.sandLight,
-            child: const Icon(
-              Icons.coffee,
-              size: 50,
-              color: AppColors.sand,
-            ),
-          );
-        },
+    return Container(
+      height: 130,
+      width: double.infinity,
+      color: AppColors.sandLight,
+      child: const Icon(
+        Icons.coffee,
+        size: 50,
+        color: AppColors.sand,
+      ),
     );
   }
 }

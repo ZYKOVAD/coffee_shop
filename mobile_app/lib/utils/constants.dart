@@ -5,6 +5,8 @@ class AppConstants {
 
   static const String apiUrl = '$baseUrl/api';
 
+  static const String mediaBaseUrl = 'http://10.0.2.2:9000';
+
   // Endpoints
   static const String login = '/Auth/login';
   static const String register = '/Auth/register';
@@ -39,6 +41,9 @@ class AppConstants {
   static const String updatePhone = '/Users';
   static const String updateEmail = '/Users';
   static const String updatePassword = '/Users';
+
+  static const String banners = '/Banners';
+  static const String popularProducts = '/Products/popular';
 
   // Storage keys
   static const String authTokenKey = 'auth_token';

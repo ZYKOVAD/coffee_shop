@@ -165,7 +165,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildAppBar() {
-    final imageUrl = widget.product.imgUrl;
+    final imageUrl = widget.product.image;
 
     return SliverAppBar(
       expandedHeight: 300,
@@ -174,10 +174,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       foregroundColor: AppColors.brown,
       flexibleSpace: FlexibleSpaceBar(
         background: CachedNetworkImage(
-          imageUrl: imageUrl.isNotEmpty
-              ? imageUrl
-              : 'https://via.placeholder.com/300',
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
+          placeholder: (_, __) => Container(
+            color: Colors.grey.shade200,
+          ),
           errorWidget: (_, __, ___) => Container(
             color: AppColors.sandLight,
             child: const Icon(Icons.coffee, size: 80),

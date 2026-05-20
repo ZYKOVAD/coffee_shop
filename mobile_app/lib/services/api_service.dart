@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart' hide Banner;
 import 'package:http/http.dart' as http;
 
 import '../models/coffee_shop.dart';
@@ -9,6 +10,7 @@ import '../models/modifier.dart';
 import '../models/order.dart';
 import '../models/cart_item.dart';
 import '../models/user.dart';
+import '../models/banner.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -317,5 +319,31 @@ class ApiService {
     if (data == null) return null;
 
     return CoffeeShop.fromJson(data);
+  }
+
+  Future<List<Banner>> getBanners() async {
+    final data = await _request(
+      'GET',
+      AppConstants.banners,
+    );
+
+    if (data == null) return [];
+
+    return (data as List)
+        .map((e) => Banner.fromJson(e))
+        .toList();
+  }
+
+  Future<List<Product>> getPopularProducts() async {
+    final data = await _request(
+      'GET',
+      AppConstants.popularProducts,
+    );
+
+    if (data == null) return [];
+
+    return (data as List)
+        .map((e) => Product.fromJson(e))
+        .toList();
   }
 }
