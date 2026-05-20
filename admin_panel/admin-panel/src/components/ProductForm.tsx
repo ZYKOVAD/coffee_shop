@@ -11,8 +11,8 @@ interface Props {
     name: string;
     description: string;
     price: number;
-    imgUrl: string;
     categoryId: number;
+    imgUrl?: string;
     isActive?: boolean;
   };
 
@@ -24,42 +24,38 @@ interface Props {
     name: string;
     description: string;
     price: number;
-    imgUrl: string;
     categoryId: number;
     isActive: boolean;
   }) => void | Promise<void>;
 
   showIsActive?: boolean;
+
+  onImageChange?: (file: File | null) => void;
+
+  onDeleteImage?: () => void | Promise<void>;
 }
 
 export default function ProductForm({
   initialData,
   onSubmit,
   showIsActive = false,
+  onImageChange,
+  onDeleteImage,
 }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const [name, setName] = useState(
-    initialData?.name || ""
-  );
+  const [name, setName] = useState(initialData?.name || "");
 
-  const [description, setDescription] =
-    useState(initialData?.description || "");
+  const [description, setDescription] = useState(initialData?.description || "");
 
-  const [price, setPrice] = useState(
-    initialData?.price || 0
-  );
+  const [price, setPrice] = useState(initialData?.price || 0);
 
-  const [imgUrl, setImgUrl] = useState(
-    initialData?.imgUrl || ""
-  );
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId || 1);
 
-  const [categoryId, setCategoryId] =
-    useState(initialData?.categoryId || 1);
+  const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
 
-  const [isActive, setIsActive] = useState(
-    initialData?.isActive ?? true
-  );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.imgUrl || null);
 
   useEffect(() => {
     loadCategories();
@@ -84,7 +80,6 @@ export default function ProductForm({
       name,
       description,
       price,
-      imgUrl,
       categoryId,
       isActive,
     });
@@ -156,16 +151,50 @@ export default function ProductForm({
             </select>
           </div>
 
-          <div style={styles.field}>
-            <label>URL изображения</label>
+          <div style={styles.formGroup}>
+            <label>Фото товара</label>
 
             <input
-              style={styles.input}
-              value={imgUrl}
-              onChange={(e) =>
-                setImgUrl(e.target.value)
-              }
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setImageFile(file);
+                onImageChange?.(file);
+                setPreviewUrl(URL.createObjectURL(file));
+              }}
             />
+
+            {previewUrl && (
+              <div style={{ marginTop: 10 }}>
+                <img
+                  src={previewUrl}
+                  style={{
+                    width: 120,
+                    height: 120,
+                    objectFit: "cover",
+                    borderRadius: 12,
+                  }}
+                />
+              </div>
+            )}
+
+            {previewUrl && (
+              <button
+                type="button"
+                style={styles.deleteImageBtn}
+                onClick={async () => {
+                  await onDeleteImage?.();
+
+                  setImageFile(null);
+                  setPreviewUrl(null);
+                  onImageChange?.(null);
+                }}
+              >
+                Удалить фото
+              </button>
+            )}
           </div>
 
           {showIsActive && (
@@ -269,4 +298,21 @@ const styles: Record<string, React.CSSProperties> =
       alignItems: "center",
       justifyContent: "center",
     },
+
+    formGroup: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+    },
+
+    deleteImageBtn: {
+    marginTop: "10px",
+    padding: "10px 14px",
+    border: "none",
+    borderRadius: "10px",
+    backgroundColor: "#c0392b",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
   };

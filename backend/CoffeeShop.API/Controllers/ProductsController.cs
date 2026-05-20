@@ -13,10 +13,12 @@ namespace CoffeeShop.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly ProductService _productService;
+    private readonly ImageService _imageService;
 
-    public ProductsController(ProductService productService)
+    public ProductsController(ProductService productService, ImageService imageService)
     {
         _productService = productService;
+        _imageService = imageService;
     }
 
     // GET: api/products
@@ -37,7 +39,7 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
-    // GET: api/products/active
+    // GET: api/products/popular
     [HttpGet("popular")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPopular()
@@ -134,7 +136,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    // PATCH: api/products/popular/id
+    // PATCH: api/products/unpopular/id
     [HttpPatch("unpopular/{id}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> NotPopular(int id)
@@ -180,6 +182,24 @@ public class ProductsController : ControllerBase
             return BadRequest(new { message = "Failed to remove modifier" });
 
         return Ok(new { message = "Modifier removed successfully" });
+    }
+
+    [HttpPost("{id}/image")]
+    public async Task<IActionResult> UploadImage(int id, [FromForm] UpdateBannerImageDto dto)
+    {
+        var imageUrl = await _imageService.UploadProductImageAsync(id, dto.File);
+
+        return Ok(new
+        {
+            imageUrl
+        });
+    }
+
+    [HttpDelete("{id}/image")]
+    public async Task<IActionResult> DeleteImage(int id)
+    {
+        await _imageService.DeleteProductImageAsync(id);
+        return NoContent();
     }
 
 }

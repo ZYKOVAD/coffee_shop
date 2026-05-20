@@ -103,3 +103,23 @@ export const deleteModifier = async (
 ) => {
   await api.delete(`/Modifiers/${id}`);
 };
+
+export async function uploadProductImage(productId: number, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await api.post(`Products/${productId}/image`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+export const deleteProductImage = async (productId: number) => {
+  await api.delete(`/Products/${productId}/image`);
+};

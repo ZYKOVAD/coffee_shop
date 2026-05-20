@@ -12,6 +12,14 @@ import {
   type DashboardStats,
 } from "../../api/dashboardApi";
 
+import {
+  getBanners,
+  createBanner,
+  updateBanner,
+  deleteBanner,
+  uploadBannerImage,
+} from "../../api/bannerApi";
+
 export default function DashboardPage() {
   const [stats, setStats] =
     useState<DashboardStats | null>(null);
@@ -30,10 +38,25 @@ export default function DashboardPage() {
 
   const [selectedPopularIds, setSelectedPopularIds] = useState<number[]>([]);
 
+  const [banners, setBanners] = useState<any[]>([]);
+
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
+
+  const [editingBanner, setEditingBanner] = useState<any | null>(null);
+
+  const [bannerTitle, setBannerTitle] = useState("");
+
+  const [bannerSortOrder, setBannerSortOrder] = useState(0);
+
+  const [bannerIsActive, setBannerIsActive] = useState(true);
+
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
+
   useEffect(() => {
     loadStats();
     loadPopular();
     loadAllProducts();
+    loadBanners();
   }, []);
 
   useEffect(() => {
@@ -72,6 +95,11 @@ export default function DashboardPage() {
     const data = await getProducts();
 
     setAllProducts(data);
+  };
+
+  const loadBanners = async () => {
+    const data = await getBanners();
+    setBanners(data);
   };
 
   const toggleLocalPopular = (id: number) => {
@@ -148,7 +176,6 @@ export default function DashboardPage() {
         Главная
       </h1>
 
-      {/* ===== stats ===== */}
       <div style={styles.section}>
         <div style={styles.grid}>
           <div style={styles.card}>
@@ -193,7 +220,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ===== бонусы ===== */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>
@@ -253,7 +279,124 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ===== популярные товары ===== */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>
+          <div>
+            <h2 style={styles.sectionTitle}>
+              Баннеры
+            </h2>
+
+            <div style={styles.popularSubtitle}>
+              Отображаются на главной странице в мобильном приложении
+            </div>
+          </div>
+
+          <div style={styles.sectionHeaderActions}>
+            <button
+              style={styles.primaryButton}
+              onClick={() => {
+                setEditingBanner(null);
+                setBannerTitle("");
+                setBannerSortOrder(0);
+                setBannerIsActive(true);
+                setBannerImage(null);
+                setBannerModalOpen(true);
+              }}
+            >
+              Добавить
+            </button>
+          </div>
+        </div>
+
+        <div style={styles.widgetsGrid}>
+          {banners.map((banner) => (
+            <div
+              key={banner.id}
+              style={styles.widgetCard}
+            >
+              {banner.imgUrl && (
+                <img
+                  src={banner.imgUrl}
+                  style={styles.widgetImage}
+                />
+              )}
+
+              <div style={styles.widgetTop}>
+                <div style={styles.widgetTitle}>
+                  {banner.title || "Без названия"}
+                </div>
+
+                <div
+                  style={{
+                    ...styles.statusBadge,
+                    backgroundColor:
+                      banner.isActive
+                        ? "#dff5e8"
+                        : "#f3f3f3",
+                    color: banner.isActive
+                      ? "#1d7a46"
+                      : "#777",
+                  }}
+                >
+                  {banner.isActive
+                    ? "Активен"
+                    : "Скрыт"}
+                </div>
+              </div>
+
+              <div style={styles.widgetDescription}>
+                Порядок: {banner.sortOrder}
+              </div>
+
+              <div style={styles.widgetActions}>
+                <button
+                  style={styles.editBtn}
+                  onClick={() => {
+                    setEditingBanner(banner);
+
+                    setBannerTitle(
+                      banner.title || ""
+                    );
+
+                    setBannerSortOrder(
+                      banner.sortOrder
+                    );
+
+                    setBannerIsActive(
+                      banner.isActive
+                    );
+
+                    setBannerModalOpen(true);
+                  }}
+                >
+                  Изменить
+                </button>
+
+                <button
+                  style={styles.deleteBtn}
+                  onClick={async () => {
+                    if (
+                      !confirm(
+                        "Удалить баннер?"
+                      )
+                    )
+                      return;
+
+                    await deleteBanner(
+                      banner.id
+                    );
+
+                    await loadBanners();
+                  }}
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
           <div>
@@ -398,6 +541,154 @@ export default function DashboardPage() {
                 onClick={savePopularProducts}
               >
                 Готово
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bannerModalOpen && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>
+                {editingBanner
+                  ? "Редактирование баннера"
+                  : "Создание баннера"}
+              </h2>
+
+              <button
+                onClick={() =>
+                  setBannerModalOpen(false)
+                }
+                style={styles.closeBtn}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <div style={styles.field}>
+                <label>Название</label>
+
+                <input
+                  style={styles.input}
+                  value={bannerTitle}
+                  onChange={(e) =>
+                    setBannerTitle(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label>Порядок</label>
+
+                <input
+                  type="number"
+                  style={styles.input}
+                  value={bannerSortOrder}
+                  onChange={(e) =>
+                    setBannerSortOrder(
+                      Number(
+                        e.target.value
+                      )
+                    )
+                  }
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label>Фото</label>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setBannerImage(
+                      e.target.files?.[0] ||
+                        null
+                    )
+                  }
+                />
+              </div>
+
+              <div style={styles.checkboxField}>
+                <input
+                  type="checkbox"
+                  checked={bannerIsActive}
+                  onChange={(e) =>
+                    setBannerIsActive(
+                      e.target.checked
+                    )
+                  }
+                />
+
+                <label>Активен</label>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.primaryButton}
+                onClick={async () => {
+                  try {
+                    if (editingBanner) {
+                      await updateBanner(
+                        editingBanner.id,
+                        {
+                          title:
+                            bannerTitle,
+                          sortOrder:
+                            bannerSortOrder,
+                          isActive:
+                            bannerIsActive,
+                        }
+                      );
+
+                      if (bannerImage) {
+                        await uploadBannerImage(
+                          editingBanner.id,
+                          bannerImage
+                        );
+                      }
+                    } else {
+                      const formData =
+                        new FormData();
+
+                      formData.append(
+                        "title",
+                        bannerTitle
+                      );
+
+                      formData.append(
+                        "sortOrder",
+                        bannerSortOrder.toString()
+                      );
+
+                      if (bannerImage) {
+                        formData.append(
+                          "file",
+                          bannerImage
+                        );
+                      }
+
+                      await createBanner(
+                        formData
+                      );
+                    }
+
+                    await loadBanners();
+
+                    setBannerModalOpen(false);
+                  } catch (e) {
+                    console.error(e);
+                    alert("Ошибка");
+                  }
+                }}
+              >
+                Сохранить
               </button>
             </div>
           </div>
@@ -689,5 +980,92 @@ const styles: Record<
     cursor: "pointer",
     transition: "0.2s",
     userSelect: "none",
+  },
+
+  widgetsGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fill, minmax(260px, 1fr))",
+    gap: "18px",
+  },
+
+  widgetCard: {
+    background: "white",
+    borderRadius: "18px",
+    overflow: "hidden",
+    boxShadow:
+      "0 4px 14px rgba(0,0,0,0.05)",
+  },
+
+  widgetImage: {
+    width: "100%",
+    height: "160px",
+    objectFit: "cover",
+  },
+
+  widgetTop: {
+    padding: "16px 16px 0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  widgetTitle: {
+    fontSize: "18px",
+    fontWeight: 700,
+    color: "#442D25",
+  },
+
+  widgetDescription: {
+    padding: "12px 16px",
+    color: "#777",
+    fontSize: "14px",
+  },
+
+  widgetActions: {
+    display: "flex",
+    gap: "10px",
+    padding: "0 16px 16px",
+  },
+
+  statusBadge: {
+    padding: "6px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: 700,
+  },
+
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    marginBottom: "18px",
+  },
+
+  input: {
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+  },
+
+  editBtn: {
+    padding: "8px 12px",
+    borderRadius: "10px",
+    border: "1px solid #442D25",
+    background: "white",
+    color: "#442D25",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
+
+  deleteBtn: {
+    padding: "8px 12px",
+    borderRadius: "10px",
+    border: "none",
+    background: "#c0392b",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: 600,
   },
 };

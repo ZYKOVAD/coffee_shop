@@ -20,7 +20,6 @@
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
-        public string? ImgUrl { get; set; }
     }
 
     public class UpdateProductDto
@@ -31,5 +30,10 @@
         public bool? IsActive { get; set; }
         public bool? IsPopular { get; set; }
         public string? ImgUrl { get; set; }
+    }
+
+    public class UpdateProductImageDto
+    {
+        public IFormFile File { get; set; } = null!;
     }
 }

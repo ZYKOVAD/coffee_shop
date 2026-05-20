@@ -7,6 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using CoffeeShop.API;
+using Microsoft.Extensions.Options;
+using Minio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +61,27 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "super-puper-secret-key-minimum-32-characters-long!";
 var key = Encoding.ASCII.GetBytes(jwtSecret);
 
+// minio
+builder.Services.Configure<MinioSettings>(
+    builder.Configuration.GetSection("Minio")
+);
+
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    var settings = sp
+        .GetRequiredService<IOptions<MinioSettings>>()
+        .Value;
+
+    return new MinioClient()
+        .WithEndpoint(settings.Endpoint)
+        .WithCredentials(
+            settings.AccessKey,
+            settings.SecretKey
+        )
+        .WithSSL(settings.UseSSL)
+        .Build();
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -100,6 +124,8 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ModifierService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<MinioService>();
+builder.Services.AddScoped<ImageService>();
 
 var app = builder.Build();
 

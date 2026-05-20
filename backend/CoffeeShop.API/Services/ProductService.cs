@@ -67,7 +67,7 @@ public class ProductService
             Description = createDto.Description ?? "",
             Price = createDto.Price,
             CategoryId = createDto.CategoryId,
-            ImgUrl = createDto.ImgUrl,
+            ImgUrl = null,
             IsActive = true,
             IsPopular = false,
             Count = 0

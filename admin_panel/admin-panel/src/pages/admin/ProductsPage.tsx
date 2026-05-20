@@ -11,6 +11,8 @@ import {
   removeModifierFromProduct,
   createProduct,
   updateProduct,
+  uploadProductImage,
+  deleteProductImage,
 } from "../../api/productsApi";
 
 import type { Product, Modifier  } from "../../types/product";
@@ -45,6 +47,8 @@ export default function ProductsPage() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productModalMode, setProductModalMode] = useState<"create" | "edit">("create");
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const loadProducts = async () => {
     try {
@@ -346,12 +350,17 @@ export default function ProductsPage() {
 
   const handleCreateProduct = async (data: any) => {
     try {
-      await createProduct(data);
+
+      const product = await createProduct(data);
+
+      if (selectedImage) {
+        await uploadProductImage(product.id, selectedImage);
+      }
 
       alert("Товар создан");
 
       setIsProductModalOpen(false);
-
+      setSelectedImage(null);
       await loadProducts();
     } catch (e) {
       console.error(e);
@@ -365,10 +374,13 @@ export default function ProductsPage() {
     try {
       await updateProduct(editingProduct.id, data);
 
+      if (selectedImage) {
+        await uploadProductImage(editingProduct.id, selectedImage);
+      }
+
       alert("Товар обновлен");
-
       setIsProductModalOpen(false);
-
+      setSelectedImage(null);
       await loadProducts();
     } catch (e) {
       console.error(e);
@@ -839,6 +851,19 @@ export default function ProductsPage() {
                     ? handleCreateProduct
                     : handleUpdateProduct
                 }
+                onImageChange={setSelectedImage}
+                onDeleteImage={async () => {
+                  if (!editingProduct) return;
+
+                  await deleteProductImage(editingProduct.id);
+
+                  await loadProducts();
+
+                  setEditingProduct({
+                    ...editingProduct,
+                    imgUrl: "",
+                  });
+                }}
               />
             </div>
 
