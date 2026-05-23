@@ -119,15 +119,21 @@ class CartService extends ChangeNotifier {
     if (userId == null) return;
 
     await _api.clearCart(userId);
+
+    _useBonuses = false;
+    _bonusToUse = 0;
+
     await loadCart();
   }
 
   void toggleUseBonuses(bool value) {
+    if (_bonusBalance <= 0) return;
+
     _useBonuses = value;
 
     if (_useBonuses) {
-      _bonusToUse = (totalPrice * 0.5) < _bonusBalance
-          ? totalPrice * 0.5
+      _bonusToUse = (totalPrice * 0.99) < _bonusBalance
+          ? totalPrice * 0.99
           : _bonusBalance;
 
       _bonusToUse =
@@ -135,6 +141,13 @@ class CartService extends ChangeNotifier {
     } else {
       _bonusToUse = 0;
     }
+
+    notifyListeners();
+  }
+
+  void resetBonuses() {
+    _useBonuses = false;
+    _bonusToUse = 0;
 
     notifyListeners();
   }

@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 
 import {
+  getCoffeeShop,
+  updateCoffeeShop,
+  type CoffeeShop,
+} from "../../api/coffeeShopApi";
+
+import {
   getProducts,
   getPopularProducts,
   makePopular,
   makeUnpopular,
 } from "../../api/productsApi";
-
-import {
-  getDashboardStats,
-  type DashboardStats,
-} from "../../api/dashboardApi";
 
 import {
   getBanners,
@@ -21,39 +22,31 @@ import {
 } from "../../api/bannerApi";
 
 export default function DashboardPage() {
-  const [stats, setStats] =
-    useState<DashboardStats | null>(null);
 
   const [loading, setLoading] = useState(true);
+  
+  const [coffeeShop, setCoffeeShop] = useState<CoffeeShop | null>(null);
+  const [savingCoffeeShop, setSavingCoffeeShop] = useState(false);
+  const [isEditingCoffeeShop, setIsEditingCoffeeShop] = useState(false);
 
   const [bonusPercent, setBonusPercent] = useState(5);
 
   const [popularProducts, setPopularProducts] = useState<any[]>([]);
-
   const [allProducts, setAllProducts] = useState<any[]>([]);
-
   const [modalOpen, setModalOpen] = useState(false);
-
   const [showOnlyPopular, setShowOnlyPopular] = useState(false);
-
   const [selectedPopularIds, setSelectedPopularIds] = useState<number[]>([]);
 
   const [banners, setBanners] = useState<any[]>([]);
-
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
-
   const [editingBanner, setEditingBanner] = useState<any | null>(null);
-
   const [bannerTitle, setBannerTitle] = useState("");
-
   const [bannerSortOrder, setBannerSortOrder] = useState(0);
-
   const [bannerIsActive, setBannerIsActive] = useState(true);
-
   const [bannerImage, setBannerImage] = useState<File | null>(null);
 
   useEffect(() => {
-    loadStats();
+    loadCoffeeShop();
     loadPopular();
     loadAllProducts();
     loadBanners();
@@ -67,17 +60,14 @@ export default function DashboardPage() {
     }
   }, [modalOpen, popularProducts]);
 
-  const loadStats = async () => {
+  const loadCoffeeShop = async () => {
     try {
-      const data =
-        await getDashboardStats();
-
-      setStats(data);
-    } catch (error) {
-      console.error(error);
-
+      const data = await getCoffeeShop();
+      setCoffeeShop(data);
+    } catch (e) {
+      console.error(e);
       alert(
-        "Ошибка загрузки dashboard"
+        "Ошибка загрузки кофейни"
       );
     } finally {
       setLoading(false);
@@ -126,10 +116,6 @@ export default function DashboardPage() {
     return <div>Loading...</div>;
   }
 
-  if (!stats) {
-    return <div>Нет данных</div>;
-  }
-
   const filteredProducts =
     showOnlyPopular
       ? allProducts.filter((p) =>
@@ -172,53 +158,219 @@ export default function DashboardPage() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.pageTitle}>
-        Главная
-      </h1>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>
+          Главная
+        </h1>
 
-      <div style={styles.section}>
-        <div style={styles.grid}>
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>
-              Пользователи
-            </h3>
+        <h2 style={styles.sectionTitle}>
+          Настройки кофейни
+        </h2>
+      </div>
 
-            <p style={styles.value}>
-              {stats.usersCount}
-            </p>
-          </div>
+      {coffeeShop && (
+        <div style={styles.section}>
+          <div style={styles.settingsCard}>
+            <div style={styles.settingsGrid}>
+              <div style={styles.field}>
+                <label style={styles.fieldLabel}>
+                  Адрес
+                </label>
 
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>
-              Товары
-            </h3>
+                <input
+                  style={{
+                    ...styles.input,
+                    ...(!isEditingCoffeeShop
+                      ? styles.disabledInput
+                      : {}),
+                  }}
+                  disabled={
+                    !isEditingCoffeeShop
+                  }
+                  value={coffeeShop.adress}
+                  onChange={(e) =>
+                    setCoffeeShop({
+                      ...coffeeShop,
+                      adress:
+                        e.target.value,
+                    })
+                  }
+                />
+              </div>
 
-            <p style={styles.value}>
-              {stats.productsCount}
-            </p>
-          </div>
+              <div style={styles.smallField}>
+                <label style={styles.fieldLabel}>
+                  Открытие
+                </label>
 
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>
-              Категории
-            </h3>
+                <input
+                  type="time"
+                  style={{
+                    ...styles.input,
+                    ...(!isEditingCoffeeShop
+                      ? styles.disabledInput
+                      : {}),
+                  }}
+                  disabled={
+                    !isEditingCoffeeShop
+                  }
+                  value={coffeeShop.open.slice(
+                    0,
+                    5
+                  )}
+                  onChange={(e) =>
+                    setCoffeeShop({
+                      ...coffeeShop,
+                      open:
+                        e.target.value +
+                        ":00",
+                    })
+                  }
+                />
+              </div>
 
-            <p style={styles.value}>
-              {stats.categoriesCount}
-            </p>
-          </div>
+              <div style={styles.smallField}>
+                <label style={styles.fieldLabel}>
+                  Закрытие
+                </label>
 
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>
-              Заказы
-            </h3>
+                <input
+                  type="time"
+                  style={{
+                    ...styles.input,
+                    ...(!isEditingCoffeeShop
+                      ? styles.disabledInput
+                      : {}),
+                  }}
+                  disabled={
+                    !isEditingCoffeeShop
+                  }
+                  value={coffeeShop.close.slice(
+                    0,
+                    5
+                  )}
+                  onChange={(e) =>
+                    setCoffeeShop({
+                      ...coffeeShop,
+                      close:
+                        e.target.value +
+                        ":00",
+                    })
+                  }
+                />
+              </div>
 
-            <p style={styles.value}>
-              {stats.ordersCount}
-            </p>
+              <div style={styles.activeField}>
+                <label style={styles.fieldLabel}>
+                  Активна
+                </label>
+
+                <input
+                  type="checkbox"
+                  disabled={
+                    !isEditingCoffeeShop
+                  }
+                  checked={
+                    coffeeShop.isActive
+                  }
+                  onChange={(e) =>
+                    setCoffeeShop({
+                      ...coffeeShop,
+                      isActive:
+                        e.target.checked,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div style={styles.settingsBottom}>
+              {!isEditingCoffeeShop ? (
+                <button
+                  style={styles.primaryButton}
+                  onClick={() =>
+                    setIsEditingCoffeeShop(
+                      true
+                    )
+                  }
+                >
+                  Изменить
+                </button>
+              ) : (
+                <div
+                  style={
+                    styles.settingsActions
+                  }
+                >
+                  <button
+                    style={
+                      styles.secondaryButton
+                    }
+                    onClick={async () => {
+                      await loadCoffeeShop();
+
+                      setIsEditingCoffeeShop(
+                        false
+                      );
+                    }}
+                  >
+                    Отмена
+                  </button>
+
+                  <button
+                    style={
+                      styles.primaryButton
+                    }
+                    disabled={
+                      savingCoffeeShop
+                    }
+                    onClick={async () => {
+                      try {
+                        setSavingCoffeeShop(
+                          true
+                        );
+
+                        await updateCoffeeShop(
+                          {
+                            adress:
+                              coffeeShop.adress,
+                            open:
+                              coffeeShop.open,
+                            close:
+                              coffeeShop.close,
+                            isActive:
+                              coffeeShop.isActive,
+                          }
+                        );
+
+                        setIsEditingCoffeeShop(
+                          false
+                        );
+
+                        alert(
+                          "Настройки сохранены"
+                        );
+                      } catch (e) {
+                        console.error(e);
+
+                        alert(
+                          "Ошибка сохранения"
+                        );
+                      } finally {
+                        setSavingCoffeeShop(
+                          false
+                        );
+                      }
+                    }}
+                  >
+                    Сохранить
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
@@ -1067,5 +1219,113 @@ const styles: Record<
     color: "white",
     cursor: "pointer",
     fontWeight: 600,
+  },
+
+  pageHeader: {
+    marginBottom: "32px",
+  },
+
+  pageSubtitle: {
+    marginTop: "10px",
+    fontSize: "16px",
+    color: "#777",
+  },
+
+  settingsCard: {
+    background: "white",
+    borderRadius: "18px",
+    padding: "20px",
+    boxShadow:
+      "0 4px 16px rgba(0,0,0,0.06)",
+  },
+
+  settingsGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "2fr 1fr 1fr auto",
+    gap: "16px",
+    alignItems: "flex-start",
+  },
+
+  smallField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+
+  activeField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    minWidth: "90px",
+  },
+
+  settingsBottom: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "20px",
+  },
+
+  settingsActions: {
+    display: "flex",
+    gap: "10px",
+  },
+
+  disabledInput: {
+    background: "#f3f1ee",
+    color: "#442D25",
+    border: "1px solid #d8d2cb",
+    opacity: 1,
+  },
+
+  timeGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "16px",
+  },
+
+  checkboxField: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  settingsTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "20px",
+  },
+
+  settingsTitle: {
+    fontSize: "22px",
+    fontWeight: 700,
+    color: "#442D25",
+    marginBottom: "6px",
+  },
+
+  settingsHint: {
+    fontSize: "14px",
+    color: "#777",
+  },
+
+  secondaryButton: {
+    background: "#f3f3f3",
+    color: "#442D25",
+    border: "1px solid #ddd",
+    padding: "10px 16px",
+    borderRadius: "12px",
+    fontWeight: 600,
+    fontSize: "14px",
+    cursor: "pointer",
+    height: "42px",
+  },
+
+  fieldLabel: {
+    fontSize: "14px",
+    fontWeight: 600,
+    color: "#5f4a43",
+    marginBottom: "8px",
   },
 };

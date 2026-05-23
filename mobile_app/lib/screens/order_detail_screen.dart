@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/order.dart';
+import '../services/api_service.dart';
 import '../services/coffee_status_service.dart';
 import '../services/order_service.dart';
 import '../services/order_status_extension.dart';
 import '../utils/colors.dart';
+import '../widgets/app_buttons.dart';
 
-
-class OrderDetailScreen extends StatelessWidget {
+class OrderDetailScreen extends StatefulWidget {
   final Order order;
 
   const OrderDetailScreen({
     super.key,
     required this.order,
   });
+
+  @override
+  State<OrderDetailScreen> createState() => _OrderDetailScreenState();
+}
+
+class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   static const _sectionTitleStyle = TextStyle(
     fontSize: 20,
@@ -24,6 +31,28 @@ class OrderDetailScreen extends StatelessWidget {
     fontSize: 16,
   );
 
+  Future<void> _cancelOrder() async {
+    final api = context.read<ApiService>();
+
+    try {
+      await api.cancelOrder(widget.order.id);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Заказ отменён')),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final coffee = context.watch<CoffeeStatusService>();
@@ -32,7 +61,7 @@ class OrderDetailScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
 
       appBar: AppBar(
-        title: Text('Заказ #${order.orderNumber}'),
+        title: Text('Заказ #${widget.order.orderNumber}'),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -51,19 +80,19 @@ class OrderDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Icon(
-                    order.status.icon,
+                    widget.order.status.icon,
                     size: 48,
-                    color: order.status.color,
+                    color: widget.order.status.color,
                   ),
 
                   const SizedBox(height: 12),
 
                   Text(
-                    order.status.displayName,
+                    widget.order.status.displayName,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: order.status.color,
+                      color: widget.order.status.color,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -79,7 +108,7 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
 
                       Text(
-                        _formatTime(toMoscowTime(order.pickupTime)),
+                        _formatTime(toMoscowTime(widget.order.pickupTime)),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -100,7 +129,7 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
 
                       Text(
-                        '#${order.orderNumber}',
+                        '#${widget.order.orderNumber}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -113,7 +142,7 @@ class OrderDetailScreen extends StatelessWidget {
             ),
 
             /// READY INFO
-            if (order.status == OrderStatus.ready) ...[
+            if (widget.order.status == OrderStatus.ready) ...[
               const SizedBox(height: 16),
 
               Container(
@@ -175,7 +204,7 @@ class OrderDetailScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  ...order.items.map(
+                  ...widget.order.items.map(
                         (item) => Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _OrderItemTile(item: item),
@@ -186,8 +215,8 @@ class OrderDetailScreen extends StatelessWidget {
             ),
 
             /// CLIENT COMMENT
-            if (order.clientComment != null &&
-                order.clientComment!.trim().isNotEmpty) ...[
+            if (widget.order.clientComment != null &&
+                widget.order.clientComment!.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
 
               _SectionCard(
@@ -202,7 +231,7 @@ class OrderDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     Text(
-                      order.clientComment!,
+                      widget.order.clientComment!,
                       style: _bodyStyle,
                     ),
                   ],
@@ -211,8 +240,8 @@ class OrderDetailScreen extends StatelessWidget {
             ],
 
             /// BARISTA COMMENT
-            if (order.baristaComment != null &&
-                order.baristaComment!.trim().isNotEmpty) ...[
+            if (widget.order.baristaComment != null &&
+                widget.order.baristaComment!.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
 
               _SectionCard(
@@ -227,7 +256,7 @@ class OrderDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     Text(
-                      order.baristaComment!,
+                      widget.order.baristaComment!,
                       style: _bodyStyle,
                     ),
                   ],
@@ -252,16 +281,16 @@ class OrderDetailScreen extends StatelessWidget {
                   _PaymentRow(
                     title: 'Сумма заказа',
                     value:
-                    '${order.totalPrice.toStringAsFixed(0)} ₽',
+                    '${widget.order.totalPrice.toStringAsFixed(0)} ₽',
                   ),
 
-                  if (order.bonusUsed > 0) ...[
+                  if (widget.order.bonusUsed > 0) ...[
                     const SizedBox(height: 10),
 
                     _PaymentRow(
                       title: 'Бонусов к списанию',
                       value:
-                      '- ${order.bonusUsed.toStringAsFixed(0)} ₽',
+                      '- ${widget.order.bonusUsed.toStringAsFixed(0)} ₽',
                       valueColor: Colors.green,
                     ),
                   ],
@@ -271,7 +300,7 @@ class OrderDetailScreen extends StatelessWidget {
                   _PaymentRow(
                     title: 'Бонусов к начислению',
                     value:
-                    '+ ${order.bonusEarned.toStringAsFixed(0)}',
+                    '+ ${widget.order.bonusEarned.toStringAsFixed(0)}',
                     valueColor: AppColors.brown,
                   ),
                 ],
@@ -294,7 +323,7 @@ class OrderDetailScreen extends StatelessWidget {
 
                   _InfoRow(
                     title: 'Создан',
-                    value: _formatDate(order.createdAt),
+                    value: _formatDate(widget.order.createdAt),
                   ),
 
                   const SizedBox(height: 8),
@@ -308,6 +337,17 @@ class OrderDetailScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
+
+            if (widget.order.status == OrderStatus.pending ||
+                widget.order.status == OrderStatus.confirmed)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _cancelOrder,
+                  style: AppButtons.danger,
+                  child: const Text('Отменить заказ'),
+                ),
+              )
           ],
         ),
       ),

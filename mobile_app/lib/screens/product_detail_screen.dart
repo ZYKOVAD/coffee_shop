@@ -203,7 +203,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Text(
       widget.product.description,
       style: const TextStyle(
-        fontSize: 14,
+        fontSize: 16,
         color: Colors.grey,
         height: 1.4,
       ),
@@ -216,11 +216,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Добавки',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Добавки',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
+
         ..._modifiers.map(_modifierTile),
       ],
     );

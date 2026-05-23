@@ -112,21 +112,20 @@ public class OrdersController : ControllerBase
         }
     }
 
-    //[HttpPost("{orderId}/pay")]
-    //public async Task<IActionResult> MarkAsPaid(int orderId)
-    //{
-    //    try
-    //    {
-    //        var order = await _orderService.MarkAsPaidAsync(orderId);
-    //        if (order == null)
-    //            return NotFound(new { message = $"Order with id {orderId} not found" });
-    //        return Ok(order);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return BadRequest(new { error = ex.Message });
-    //    }
-    //}
+    [HttpPut("{orderId}/cancel")]
+    public async Task<IActionResult> Cancel(int orderId)
+    {
+        try
+        {
+            var order = await _orderService.Cancel(orderId);
+            if (order == null) return NotFound(new { message = $"Order with id {orderId} not found" });
+            return Ok(order);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
     private int GetCurrentUserId()
     {

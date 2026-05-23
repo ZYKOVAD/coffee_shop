@@ -35,6 +35,7 @@ export default function CreateBaristaPage() {
       submitText="Создать"
       loading={loading}
       showPassword
+      passwordRequired
       onSubmit={handleSubmit}
     />
   );

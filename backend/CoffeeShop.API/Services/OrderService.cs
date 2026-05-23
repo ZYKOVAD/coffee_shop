@@ -121,7 +121,12 @@ public class OrderService
             bonusToUse = totalPrice;
 
         decimal finalPrice = totalPrice - bonusToUse;
-        decimal bonusEarned = Math.Floor(totalPrice * BONUS_PERCENT);
+        decimal bonusEarned = 0;
+
+        if (bonusToUse <= 0)
+        {
+            bonusEarned = Math.Floor(finalPrice * BONUS_PERCENT);
+        }
 
         // Create order
         var order = new Order
@@ -165,13 +170,6 @@ public class OrderService
         await _cartItemRepository.ClearUserCartAsync(userId);
         await _context.SaveChangesAsync();
 
-        //// Create notification
-        //await _notificationService.CreateOrderStatusNotificationAsync(
-        //    userId,
-        //    order.Id,
-        //    "pending",
-        //    "Ваш заказ создан и ожидает подтверждения бариста");
-
         return MapToDto(order);
     }
 
@@ -181,7 +179,7 @@ public class OrderService
         if (order == null)
             return null;
 
-        var validStatuses = new[] { "pending", "confirmed", "paid", "preparing", "ready", "completed", "cancelled", "rejected", "notPickedUp"};
+        var validStatuses = new[] { "pending", "confirmed", "paid", "preparing", "ready", "completed", "cancelled", "rejected", "notPickedUp", "refunded" };
         if (!validStatuses.Contains(status))
             throw new Exception($"Invalid status '{status}'");
 
@@ -191,25 +189,73 @@ public class OrderService
 
         _orderRepository.Update(order);
 
-        // If order is completed, accrue bonuses
         if (status == "completed" && order.BonusEarned > 0)
         {
             await _bonusTransactionService.AccrueBonusesAsync(
                 order.UserId,
                 order.Id,
-                order.BonusEarned,
-                $"Начисление {order.BonusEarned} бонусов за заказ #{order.Id}");
+                order.BonusEarned);
         }
+
+        if (status == "refunded")
+        {
+            if (order.BonusEarned > 0)
+            {
+                await _bonusTransactionService.RevertAccrualBonusesAsync(
+                    order.UserId,
+                    order.Id,
+                    order.BonusEarned);
+            }
+
+            if (order.BonusUsed > 0)
+            {
+                await _bonusTransactionService.RevertRedeemBonusesAsync(
+                    order.UserId,
+                    order.Id,
+                    order.BonusUsed);
+            }
+
+            order.BonusEarned = 0;
+            order.BonusUsed = 0;
+        }
+
 
         await _context.SaveChangesAsync();
 
-        // Create notification for user
-        //var message = GetStatusMessage(status);
-        //await _notificationService.CreateOrderStatusNotificationAsync(
-        //    order.UserId,
-        //    order.Id,
-        //    status,
-        //    message);
+        return MapToDto(order);
+    }
+
+    public async Task<OrderDto?> Cancel(int orderId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        if (order == null) return null;
+
+        var cancellableStatuses = new[] { "pending", "confirmed" };
+
+        if (!cancellableStatuses.Contains(order.Status)) throw new Exception($"Order with status '{order.Status}' cannot be cancelled");
+
+        if (order.BonusUsed > 0)
+        {
+            await _bonusTransactionService.RevertRedeemBonusesAsync(
+                order.UserId,
+                order.Id,
+                order.BonusUsed);
+        }
+
+        if (order.BonusEarned > 0)
+        {
+            await _bonusTransactionService.RevertAccrualBonusesAsync(
+                order.UserId,
+                order.Id,
+                order.BonusEarned);
+        }
+
+        order.BonusEarned = 0;
+        order.BonusUsed = 0;
+        order.Status = "cancelled";
+
+        _orderRepository.Update(order);
+        await _context.SaveChangesAsync();
 
         return MapToDto(order);
     }

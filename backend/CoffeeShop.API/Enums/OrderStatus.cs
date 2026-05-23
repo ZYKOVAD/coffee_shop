@@ -10,6 +10,7 @@
         Completed,
         Cancelled,
         Rejected,
-        NotPickedUp
+        NotPickedUp,
+        Refunded
     }
 }

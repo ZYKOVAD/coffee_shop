@@ -18,21 +18,43 @@ const statuses = [
   "cancelled",
   "rejected",
   "notPickedUp",
+  "refunded",
 ];
+
+const getNextStatuses = (status: string) => {
+  switch (status) {
+    case "pending":
+      return ["confirmed", "preparing", "rejected"];
+
+    case "confirmed":
+      return ["preparing"];
+
+    case "preparing":
+      return ["ready"];
+
+    case "ready":
+      return ["completed", "notPickedUp"];
+
+    case "completed":
+      return ["refunded"];
+
+    default:
+      return [];
+  }
+};
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<
     Order[]
   >([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [statusFilter, setStatusFilter] =
-    useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const [selectedOrder, setSelectedOrder] =
-    useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const [comments, setComments] =
     useState<
@@ -59,12 +81,19 @@ export default function OrdersPage() {
     }
   };
 
-  const handleStatusChange =
-    async (
-      orderId: number,
-      newStatus: string
-    ) => {
-      try {
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
+
+    if (!order) return;
+
+    const allowed = getNextStatuses(order.status); 
+    
+     if (!allowed.includes(newStatus)) {
+      alert(`Нельзя перевести ${order.status} → ${newStatus}`);
+      return;
+    }
+
+    try {
         await updateOrderStatus(
           orderId,
           {
@@ -239,11 +268,10 @@ export default function OrdersPage() {
                       style={
                         styles.button
                       }
-                      onClick={() =>
-                        setSelectedOrder(
-                          order
-                        )
-                      }
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setSelectedStatus(order.status);
+                      }}
                     >
                       Подробнее
                     </button>
@@ -433,12 +461,9 @@ export default function OrdersPage() {
               </h3>
 
               <select
-                value={selectedOrder.status}
+                value={selectedStatus}
                 onChange={(e) =>
-                  setSelectedOrder({
-                    ...selectedOrder,
-                    status: e.target.value,
-                  })
+                  setSelectedStatus(e.target.value)
                 }
                 style={{
                 ...styles.modalSelect,
@@ -447,16 +472,15 @@ export default function OrdersPage() {
                 ),
               }}
               >
-                {statuses
-                  .filter((s) => s !== "all")
-                  .map((status) => (
-                    <option
-                      key={status}
-                      value={status}
-                    >
-                      {getStatusLabel(status)}
-                    </option>
-                  ))}
+                <option value={selectedOrder.status}>
+                  {getStatusLabel(selectedOrder.status)}
+                </option>
+
+                {getNextStatuses(selectedOrder.status).map((status) => (
+                  <option key={status} value={status}>
+                    {getStatusLabel(status)}
+                  </option>
+                ))}
               </select>
 
               <textarea
@@ -490,12 +514,10 @@ export default function OrdersPage() {
                 onClick={async () => {
                   await handleStatusChange(
                     selectedOrder.id,
-                    selectedOrder.status
+                    selectedStatus
                   );
 
-                  setSelectedOrder(
-                    null
-                  );
+                  setSelectedOrder(null);
                 }}
               >
                 Сохранить
@@ -576,6 +598,14 @@ const statusConfig: Record<
     style: {
       backgroundColor: "#e5e7eb",
       color: "#374151",
+    },
+  },
+
+  refunded: {
+    label: "Возврат",
+    style: {
+      backgroundColor: "#e0e7ff",
+      color: "#3730a3",
     },
   },
 };

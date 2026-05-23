@@ -447,7 +447,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${cart.bonusBalance.toStringAsFixed(0)} ₽',
+                '${cart.bonusBalance.toStringAsFixed(0)} Б',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

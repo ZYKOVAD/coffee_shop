@@ -54,7 +54,7 @@ public class BonusTransactionService
         };
     }
 
-    public async Task<BonusTransactionDto> AccrueBonusesAsync(int userId, int orderId, decimal amount, string description)
+    public async Task<BonusTransactionDto> AccrueBonusesAsync(int userId, int orderId, decimal amount)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -105,6 +105,54 @@ public class BonusTransactionService
         await _context.SaveChangesAsync();
 
         return MapToDto(transaction);
+    }
+
+    public async Task<BonusTransactionDto> RevertRedeemBonusesAsync(int userId, int orderId, decimal amount)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) throw new Exception($"User with id {userId} not found");
+
+        var transaction = new BonusTransaction
+        {
+            UserId = userId,
+            OrderId = orderId,
+            Amount = amount,
+            Type = "refund", 
+            CreatedAt = DateTime.UtcNow
+        };
+
+        user.BonusBalance += amount;
+        _userRepository.Update(user);
+
+        await _bonusTransactionRepository.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+
+        return MapToDto(transaction);
+    }
+
+    public async Task RevertAccrualBonusesAsync(int userId, int orderId, decimal amount)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new Exception($"User with id {userId} not found");
+
+        var transaction = new BonusTransaction
+        {
+            UserId = userId,
+            OrderId = orderId,
+            Amount = amount,
+            Type = "revert_accrual",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        user.BonusBalance -= amount;
+        if (user.BonusBalance < 0)
+            user.BonusBalance = 0;
+
+        _userRepository.Update(user);
+
+        await _bonusTransactionRepository.AddAsync(transaction);
+        await _context.SaveChangesAsync();
     }
 
     private BonusTransactionDto MapToDto(BonusTransaction transaction)

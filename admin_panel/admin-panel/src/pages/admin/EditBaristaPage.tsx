@@ -77,6 +77,7 @@ export default function EditBaristaPage() {
       submitText="Сохранить"
       initialData={barista}
       onSubmit={handleSubmit}
+      showPassword
     />
   );
 }

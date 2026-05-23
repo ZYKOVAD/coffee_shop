@@ -29,6 +29,9 @@ extension OrderStatusExtension on OrderStatus {
 
       case OrderStatus.notPickedUp:
         return 'Не забран';
+
+      case OrderStatus.refunded:
+        return 'Возврат';
     }
   }
 
@@ -55,6 +58,9 @@ extension OrderStatusExtension on OrderStatus {
 
       case OrderStatus.notPickedUp:
         return AppColors.brown;
+
+      case OrderStatus.refunded:
+        return Colors.purple;
     }
   }
 
@@ -81,6 +87,9 @@ extension OrderStatusExtension on OrderStatus {
 
       case OrderStatus.notPickedUp:
         return Icons.remove_circle_outline;
+
+      case OrderStatus.refunded:
+        return Icons.currency_exchange;
     }
   }
 }

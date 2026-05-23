@@ -10,7 +10,8 @@ enum OrderStatus {
   completed,
   cancelled,
   rejected,
-  notPickedUp;
+  notPickedUp,
+  refunded;
 
   static OrderStatus fromString(String status) {
     return OrderStatus.values.firstWhere(

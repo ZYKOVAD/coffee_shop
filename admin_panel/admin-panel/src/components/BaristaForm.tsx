@@ -3,20 +3,16 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
   title: string;
-
   submitText: string;
-
   loading?: boolean;
-
   initialData?: {
     username: string;
     email: string;
     phone: string;
     role?: "admin" | "barista";
   };
-
   showPassword?: boolean;
-
+  passwordRequired?: boolean;
   onSubmit: (data: {
     username: string;
     email: string;
@@ -32,29 +28,21 @@ export default function BaristaForm({
   loading,
   initialData,
   showPassword = false,
+  passwordRequired = false,
   onSubmit,
 }: Props) {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState(
-    initialData?.username || ""
-  );
+  const [username, setUsername] = useState(initialData?.username || "");
 
-  const [email, setEmail] = useState(
-    initialData?.email || ""
-  );
+  const [email, setEmail] = useState(initialData?.email || "");
 
   const [phone, setPhone] = useState(initialData?.phone || "");
   
-  const [role, setRole] = useState<
-    "admin" | "barista"
-  >(
-    initialData?.role || "barista"
-  );
+  const [role, setRole] = useState<"admin" | "barista">(initialData?.role || "barista");
 
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = async (
     e: React.FormEvent
@@ -62,7 +50,7 @@ export default function BaristaForm({
     e.preventDefault();
 
     if (
-      showPassword &&
+      password &&
       password !== confirmPassword
     ) {
       alert("Пароли не совпадают");
@@ -73,9 +61,8 @@ export default function BaristaForm({
       username,
       email,
       phone,
-      password: showPassword
-        ? password
-        : undefined,
+      password:
+        password.trim() || undefined,
       role,
     });
   };
@@ -166,7 +153,7 @@ export default function BaristaForm({
                 }
                 placeholder="Пароль"
                 style={styles.input}
-                required
+                required={passwordRequired}
               />
 
               <input
@@ -179,8 +166,15 @@ export default function BaristaForm({
                 }
                 placeholder="Повтор пароля"
                 style={styles.input}
-                required
+                required={passwordRequired}
               />
+
+              {!passwordRequired && (
+                <div style={styles.passwordHint}>
+                  Оставьте поля пустыми,
+                  если не нужно менять пароль
+                </div>
+              )}
             </>
           )}
 
@@ -269,5 +263,11 @@ const styles: Record<
     fontWeight: 600,
     cursor: "pointer",
     fontSize: "16px",
+  },
+
+  passwordHint: {
+    marginTop: "-6px",
+    fontSize: "13px",
+    color: "#777",
   },
 };

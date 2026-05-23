@@ -310,6 +310,10 @@ class ApiService {
     return Order.fromJson(data);
   }
 
+  Future<void> cancelOrder(int orderId) async {
+    await _request('PUT', '/Orders/$orderId/cancel');
+  }
+
   Future<CoffeeShop?> getCoffeeShop() async {
     final data = await _request(
       'GET',

@@ -22,12 +22,10 @@ export default function BaristaOrdersPage() {
     useEffect(() => {
 
         loadOrders();
-
         const interval = window.setInterval(
             loadOrders,
             10000
         );
-
         return () => {
             clearInterval(interval);
         };

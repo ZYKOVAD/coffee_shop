@@ -1,8 +1,14 @@
 import { Outlet, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useEffect } from "react";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    document.title =
+      "Casa Busano Admin";
+  }, []);
 
   return (
     <div style={styles.container}>

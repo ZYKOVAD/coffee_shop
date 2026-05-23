@@ -186,12 +186,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: cart.useBonuses,
-                    onChanged: cart.toggleUseBonuses,
+                    onChanged: cart.bonusBalance <= 0
+                        ? null
+                        : cart.toggleUseBonuses,
                     activeThumbColor: AppColors.brown,
                     activeTrackColor: AppColors.brown.withOpacity(0.4),
-                    title: const Text(
+                    title: Text(
                       'Использовать бонусы',
-                      style: _bodyStyle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: cart.bonusBalance <= 0
+                            ? Colors.grey
+                            : Colors.black,
+                      ),
                     ),
                   ),
                   if (cart.useBonuses)
